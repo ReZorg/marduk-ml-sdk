@@ -261,8 +261,7 @@ export class AgentTemplateLibrary {
 				description: 'Helps with research tasks by searching, analyzing, and summarizing information',
 				capabilities: ['search', 'analysis', 'summarization'],
 				tools: ['web_search', 'read_file', 'memory_store', 'memory_recall'],
-				systemPrompt: `You are a research assistant. Your role is to help users find, analyze, and understand information. 
-Be thorough in your research, cite sources when possible, and present information clearly.`,
+				systemPrompt: 'You are a research assistant. Your role is to help users find, analyze, and understand information. Be thorough in your research, cite sources when possible, and present information clearly.',
 				configuration: {
 					model: 'gpt-4',
 					temperature: 0.3,
@@ -287,8 +286,7 @@ Be thorough in your research, cite sources when possible, and present informatio
 				description: 'Helps with coding tasks including writing, reviewing, and debugging code',
 				capabilities: ['code-generation', 'code-review', 'debugging'],
 				tools: ['read_file', 'write_file', 'execute_code'],
-				systemPrompt: `You are a code assistant. Your role is to help users write, review, and debug code.
-Follow best practices, write clean and maintainable code, and explain your reasoning.`,
+				systemPrompt: 'You are a code assistant. Your role is to help users write, review, and debug code. Follow best practices, write clean and maintainable code, and explain your reasoning.',
 				configuration: {
 					model: 'gpt-4',
 					temperature: 0.1,
@@ -313,8 +311,7 @@ Follow best practices, write clean and maintainable code, and explain your reaso
 				description: 'Automates repetitive tasks and workflows',
 				capabilities: ['task-execution', 'scheduling', 'workflow-management'],
 				tools: ['execute_code', 'http_request', 'schedule_task', 'send_message'],
-				systemPrompt: `You are a task automation agent. Your role is to help users automate repetitive tasks and workflows.
-Be efficient, handle errors gracefully, and provide clear status updates.`,
+				systemPrompt: 'You are a task automation agent. Your role is to help users automate repetitive tasks and workflows. Be efficient, handle errors gracefully, and provide clear status updates.',
 				configuration: {
 					model: 'gpt-4',
 					temperature: 0.2,
@@ -456,12 +453,7 @@ export class AgentBuilder {
 		const capabilities = blueprint.capabilities.join(', ');
 		const tools = blueprint.tools.join(', ');
 
-		return `You are ${blueprint.name}. ${blueprint.description}
-
-Your capabilities include: ${capabilities}.
-You have access to the following tools: ${tools}.
-
-Be helpful, accurate, and efficient in your responses.`;
+		return `You are ${blueprint.name}. ${blueprint.description} Your capabilities include: ${capabilities}. You have access to the following tools: ${tools}. Be helpful, accurate, and efficient in your responses.`;
 	}
 
 	/**

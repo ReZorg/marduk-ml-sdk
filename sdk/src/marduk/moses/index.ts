@@ -681,7 +681,7 @@ export class MOSESEngine {
 		const fitness = this.fitnessEvaluator.evaluate(genome, evaluationFn);
 
 		return {
-			id: `ind-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+			id: `ind-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
 			genome,
 			fitness,
 			generation: this.populationManager.getGeneration() + 1,
