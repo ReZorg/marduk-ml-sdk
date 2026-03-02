@@ -96,7 +96,7 @@ export class RateLimitService {
                 return { success: result.success };
             }
             case RateLimitStore.KV: {
-                return await KVRateLimitStore.increment(env.VibecoderStore, key, rateLimitConfig as KVRateLimitConfig, incrementBy);
+                return await KVRateLimitStore.increment(env.MardukStore, key, rateLimitConfig as KVRateLimitConfig, incrementBy);
             }
             case RateLimitStore.DURABLE_OBJECT:
                 return await this.enforceDORateLimit(env, key, rateLimitConfig as DORateLimitConfig, incrementBy);
