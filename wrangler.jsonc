@@ -6,7 +6,12 @@
  * capabilities of VibeSDK with Marduk's memory, task management,
  * AI coordination, autonomy, and MOSES subsystems.
  *
- * Source architecture: orgitcog/mad9ml
+ * P9Fstyx integration adds OpenCog AtomSpace hypergraph persistence,
+ * 9P/Styx cognitive kernel communication, distributed micro-kernel
+ * orchestration, wave field dynamics, gauge kernel parallel transport,
+ * differential engine B-series expansions, and PowerSkill optimization.
+ *
+ * Source architecture: orgitcog/mad9ml, orgitcog/p9fstyx
  * Platform base: cloudflare/vibesdk
  *
  * For more details on how to configure Wrangler, refer to:
@@ -158,6 +163,11 @@
 	 *   persona tensors, hypergraph snapshots, ECAN attention values)
 	 * - TASK_METRICS: Task execution metrics, autonomy optimization history,
 	 *   and scheduled task completion tracking
+	 * - ATOMSPACE_KV: OpenCog AtomSpace hypergraph persistence (atoms, links,
+	 *   truth values, incoming/outgoing sets, pattern matcher indexes)
+	 * - P9FSTYX_STATE: P9Fstyx cognitive kernel state (PowerScribe module
+	 *   registry, micro-kernel network topology, wave field snapshots,
+	 *   lambda-promise constellations, grip optimizer checkpoints)
 	 */
 	"kv_namespaces": [
 		{
@@ -174,8 +184,80 @@
 			"binding": "TASK_METRICS",
 			"id": "your_task_metrics_namespace_id",
 			"remote": true
+		},
+		{
+			"binding": "ATOMSPACE_KV",
+			"id": "your_atomspace_namespace_id",
+			"remote": true
+		},
+		{
+			"binding": "P9FSTYX_STATE",
+			"id": "your_p9fstyx_state_namespace_id",
+			"remote": true
 		}
 	],
+	/**
+	 * Vectorize Indexes
+	 *
+	 * Semantic memory index for Marduk's cognitive hypergraph.
+	 * Enables vector similarity search across AtomSpace atoms,
+	 * memory subsystems (declarative, episodic, semantic), MOSES
+	 * evolved patterns, and P9Fstyx micro-kernel state embeddings.
+	 */
+	// "vectorize": [
+	// 	{
+	// 		"binding": "MARDUK_VECTORS",
+	// 		"index_name": "marduk-cognitive-vectors"
+	// 	}
+	// ],
+	/**
+	 * Queues
+	 *
+	 * Async processing for Marduk cognitive tasks and P9Fstyx
+	 * distributed micro-kernel orchestration:
+	 * - Memory consolidation and AtomSpace optimization
+	 * - MOSES evolution cycles and grammar mutation
+	 * - P9Fstyx PowerScribe self-orchestration requests
+	 * - Micro-kernel choreomorphic agent dispatching
+	 * - Wave field evolution and gauge transport computations
+	 */
+	// "queues": {
+	// 	"producers": [
+	// 		{
+	// 			"binding": "MARDUK_TASK_QUEUE",
+	// 			"queue": "marduk-cognitive-tasks"
+	// 		},
+	// 		{
+	// 			"binding": "P9FSTYX_KERNEL_QUEUE",
+	// 			"queue": "p9fstyx-kernel-dispatch"
+	// 		}
+	// 	],
+	// 	"consumers": [
+	// 		{
+	// 			"queue": "marduk-cognitive-tasks",
+	// 			"max_batch_size": 10,
+	// 			"max_batch_timeout": 30
+	// 		},
+	// 		{
+	// 			"queue": "p9fstyx-kernel-dispatch",
+	// 			"max_batch_size": 5,
+	// 			"max_batch_timeout": 15
+	// 		}
+	// 	]
+	// },
+	/**
+	 * Analytics Engine
+	 *
+	 * Cognitive telemetry dataset for tracking attention allocation,
+	 * memory access patterns, autonomy optimization cycles, AtomSpace
+	 * query performance, and P9Fstyx micro-kernel field dynamics.
+	 */
+	// "analytics_engine_datasets": [
+	// 	{
+	// 		"binding": "MARDUK_ANALYTICS",
+	// 		"dataset": "marduk-cognitive-telemetry"
+	// 	}
+	// ],
 	"placement": {
 		"mode": "smart"
 	},
@@ -215,7 +297,7 @@
 	 * Environment Variables
 	 *
 	 * Platform configuration combining VibeSDK operational settings
-	 * with Marduk cognitive architecture parameters.
+	 * with Marduk cognitive architecture and P9Fstyx parameters.
 	 */
 	"vars": {
 		"TEMPLATES_REPOSITORY": "https://github.com/cloudflare/vibesdk-templates",
@@ -236,6 +318,12 @@
 				},
 				"cognitive": {
 					"enabled": true
+				},
+				"atomspace": {
+					"enabled": true
+				},
+				"p9fstyx": {
+					"enabled": true
 				}
 			},
 			"version": "1.0.0"
@@ -252,7 +340,22 @@
 		"MARDUK_ATTENTION_DECAY_RATE": "0.05",
 		"MARDUK_ATTENTION_SPREADING_FACTOR": "0.8",
 		"MARDUK_ENABLE_META_COGNITION": "true",
-		"MARDUK_ENABLE_AUTONOMY": "true"
+		"MARDUK_ENABLE_AUTONOMY": "true",
+		"P9FSTYX_STYX_MOUNT_POINT": "/n/cognitive",
+		"P9FSTYX_WAVE_SPEED": "1.0",
+		"P9FSTYX_WAVE_DAMPING": "0.01",
+		"P9FSTYX_GAUGE_GROUP": "U1",
+		"P9FSTYX_GAUGE_DIMENSION": "3",
+		"P9FSTYX_GRIP_LEARNING_RATE": "0.01",
+		"P9FSTYX_GRIP_MOMENTUM": "0.9",
+		"P9FSTYX_KERNEL_NETWORK_DIMENSIONS": "3",
+		"P9FSTYX_POWERSCRIBE_AUTO_ORCHESTRATE": "true",
+		"P9FSTYX_POWERSKILL_POPULATION_SIZE": "10",
+		"P9FSTYX_POWERSKILL_OUTER_LOOPS": "5",
+		"P9FSTYX_POWERSKILL_INNER_ITERATIONS": "50",
+		"ATOMSPACE_MAX_ATOMS": "100000",
+		"ATOMSPACE_PATTERN_CACHE_SIZE": "1000",
+		"ATOMSPACE_ENABLE_ADVANCED_PATTERNS": "true"
 	},
 	"workers_dev": false,
 	"preview_urls": false
