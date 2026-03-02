@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.0 (2026-03-02)
+
+
+### Features
+
+* **wrangler:** integrate P9Fstyx cognitive kernel and AtomSpace bindings ([6f25358](https://github.com/ReZorg/marduk-ml-sdk/commit/6f253581eab57e52b9ab614906b6b429e5b16c9d))
+
+
+### Bug Fixes
+
+* Created database and updated database_id ([edbf0a3](https://github.com/ReZorg/marduk-ml-sdk/commit/edbf0a3486c359ac0c0cf6039a43981009aa44fb))
+* Created namespace 'marduk-store' (1ecc1e3d85c745d387c675dd7bfd4d93) ([6092b28](https://github.com/ReZorg/marduk-ml-sdk/commit/6092b287c8c5a262827cf36f60439e3b2b583482))
+* **wrangler:** integrate Marduk cognitive architecture bindings from mad9ml ([fe5a03e](https://github.com/ReZorg/marduk-ml-sdk/commit/fe5a03e392039a7d63e881352a1fb2efd1c66040))
+* **wrangler:** replace D1 database ID with newly created marduk-ml-sdk-db ([edbf0a3](https://github.com/ReZorg/marduk-ml-sdk/commit/edbf0a3486c359ac0c0cf6039a43981009aa44fb))
+* **wrangler:** replace MardukStore KV namespace ID with valid account namespace ([6092b28](https://github.com/ReZorg/marduk-ml-sdk/commit/6092b287c8c5a262827cf36f60439e3b2b583482))
+* **wrangler:** replace placeholder KV namespace IDs with real Cloudflare IDs ([df9a670](https://github.com/ReZorg/marduk-ml-sdk/commit/df9a670208bcddfe13a9aab22f8d780878143c25))
+
 ## [1.5.0](https://github.com/cloudflare/vibesdk/compare/v1.4.0...v1.5.0) (2026-02-03)
 
 
