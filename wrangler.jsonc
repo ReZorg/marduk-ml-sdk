@@ -177,22 +177,22 @@
 		},
 		{
 			"binding": "MARDUK_KV",
-			"id": "d1fcd8dbbd35aec43e5499200f6baede",
+			"id": "bed8f7fba72f4101bf7cf5fdfa43fbd3",
 			"remote": true
 		},
 		{
 			"binding": "TASK_METRICS",
-			"id": "your_task_metrics_namespace_id",
+			"id": "94599ec5a4af49a4bc66c8815e85a1d8",
 			"remote": true
 		},
 		{
 			"binding": "ATOMSPACE_KV",
-			"id": "your_atomspace_namespace_id",
+			"id": "5b5c50565a984a85b0967bd06683b27d",
 			"remote": true
 		},
 		{
 			"binding": "P9FSTYX_STATE",
-			"id": "your_p9fstyx_state_namespace_id",
+			"id": "12d928e7197a4799bb57b68fd9975198",
 			"remote": true
 		}
 	],
