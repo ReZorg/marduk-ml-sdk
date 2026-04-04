@@ -1,0 +1,81 @@
+name: ML Training Pipeline
+
+on:
+  push:
+    branches:
+      - 'ml/**'
+  workflow_dispatch:
+    inputs:
+      template:
+        description: 'ML template to train (ml-training-pipeline, ml-fine-tuning, ml-rl-environment)'
+        required: false
+        default: 'ml-training-pipeline'
+      epochs:
+        description: 'Number of training epochs'
+        required: false
+        default: '10'
+
+jobs:
+  train:
+    name: Train ML Model
+    runs-on: ubuntu-latest
+    container:
+      image: pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
+      options: --shm-size=4gb
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install mlflow wandb dvc[s3] pytest
+
+      - name: Configure MLflow
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI || 'file:./mlruns' }}
+          MLFLOW_EXPERIMENT_NAME: ${{ github.repository }}-${{ github.ref_name }}
+        run: |
+          mlflow experiments create --experiment-name "$MLFLOW_EXPERIMENT_NAME" 2>/dev/null || true
+
+      - name: Run training
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI || 'file:./mlruns' }}
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+          EPOCHS: ${{ github.event.inputs.epochs || '10' }}
+        run: |
+          python scripts/train.py \
+            --epochs "$EPOCHS" \
+            --run-name "ci-${{ github.run_id }}" \
+            --output-dir ./artifacts/model
+
+      - name: Run evaluation
+        run: |
+          python scripts/evaluate.py \
+            --model-path ./artifacts/model \
+            --output-path ./artifacts/metrics.json
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model-${{ github.run_id }}
+          path: ./artifacts/
+          retention-days: 30
+
+      - name: Post metrics summary
+        if: always()
+        run: |
+          if [ -f ./artifacts/metrics.json ]; then
+            echo "## Training Metrics" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat ./artifacts/metrics.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi

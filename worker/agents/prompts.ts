@@ -1106,3 +1106,154 @@ export const getUsecaseSpecificInstructions = (selectedTemplate: TemplateSelecti
             ${getStyleInstructions(selectedTemplate.styleSelection)}`;
     }
 }
+
+// ============================================================================
+// ML / Data Science System Prompt Extensions
+// These are appended when the project type is 'cognitive' or when the user
+// query contains ML-related keywords detected by isMLQuery().
+// ============================================================================
+
+/**
+ * Detects whether a user query is ML/data-science oriented.
+ */
+export function isMLQuery(query: string): boolean {
+    const keywords = [
+        'pytorch', 'tensorflow', 'keras', 'scikit-learn', 'sklearn',
+        'huggingface', 'transformers', 'peft', 'lora', 'mlflow',
+        'wandb', 'weights & biases', 'dvc', 'kedro', 'gymnasium',
+        'reinforcement learning', 'rl agent', 'neural network', 'train model',
+        'fine-tun', 'dataset', 'pandas', 'polars', 'data pipeline',
+        'model serving', 'fastapi model', 'inference endpoint', 'embedding',
+        'classification', 'regression', 'clustering', 'automl',
+        'machine learning', 'deep learning', 'llm', 'language model',
+        'diffusion', 'stable diffusion', 'rag', 'retrieval',
+    ];
+    const lower = query.toLowerCase();
+    return keywords.some((kw) => lower.includes(kw));
+}
+
+/**
+ * ML-aware system prompt section appended when an ML project is detected.
+ * Guides the LLM to produce Python-idiomatic ML code following MLOps best practices.
+ */
+export const ML_SYSTEM_PROMPT_EXTENSION = `
+<ML_SPECIALIZATION>
+You are operating in ML mode. The user wants to build a machine learning project.
+Follow these guidelines strictly in addition to all existing coding principles.
+
+## Python ML Stack
+- Use PyTorch as the default deep learning framework unless the user specifies otherwise.
+- For classical ML, use scikit-learn with Pipeline objects (never raw model objects without pipelines).
+- For data manipulation, prefer Polars for performance, Pandas when interoperability is needed.
+- For NLP / LLMs, use HuggingFace Transformers + PEFT/LoRA for fine-tuning.
+- For RL environments, use Gymnasium (not deprecated OpenAI Gym).
+
+## Project Structure
+All ML projects must follow this layout:
+\`\`\`
+src/
+  data/           - Data loading, preprocessing, augmentation
+  models/         - Model architecture definitions
+  training/       - Training loops, loss functions, optimizers
+  evaluation/     - Metrics, validation, test harness
+  serving/        - Inference endpoints, ONNX export
+config/
+  config.yaml     - Hydra or YAML-based hyperparameter config
+scripts/
+  train.py        - Entry point for training
+  evaluate.py     - Entry point for evaluation
+  serve.py        - Entry point for serving
+\`\`\`
+
+## Training Loop Best Practices
+- Always split data: train / validation / test (70/15/15 or 80/10/10)
+- Use torch.utils.data.DataLoader with num_workers > 0 and pin_memory=True on GPU
+- Implement gradient clipping (torch.nn.utils.clip_grad_norm_) for stability
+- Log metrics every N steps to MLflow or W&B: loss, accuracy, learning rate
+- Save checkpoints on best validation metric (not just last epoch)
+- Include early stopping with patience parameter
+- Use mixed precision (torch.cuda.amp.autocast) for GPU training
+
+## MLOps
+- Every training run MUST be logged with MLflow or W&B:
+  - hyperparameters as run params
+  - metrics per epoch as run metrics
+  - model artifact logged at end of training
+- Use DVC for data versioning if the project involves large datasets
+- Dockerfile must use CUDA-capable base image when GPU training is required
+- Requirements pinned in requirements.txt with exact versions
+
+## Model Serving
+- FastAPI is the preferred serving framework
+- Expose /health, /predict, and /metrics endpoints
+- Load the model once at startup using lifespan context manager (not on every request)
+- Include Pydantic request/response schemas
+- For HuggingFace models, use pipeline() or transformers.AutoModel for loading
+- For ONNX models, use onnxruntime.InferenceSession
+
+## Reinforcement Learning
+- Use Gymnasium API: env = gym.make(...), obs, info = env.reset(), obs, reward, terminated, truncated, info = env.step(action)
+- Implement custom environments by subclassing gymnasium.Env
+- Use Stable-Baselines3 for standard algorithms (PPO, SAC, DQN) unless a custom implementation is requested
+- Log episode reward, episode length, and entropy to TensorBoard or W&B
+
+## Code Quality for ML
+- All tensor shapes must be documented in comments: # (batch, seq_len, hidden)
+- Use type hints throughout: inputs: torch.Tensor, model: nn.Module
+- Never use magic numbers for dimensions — define them as named constants
+- Seed everything for reproducibility: random, numpy, torch, CUDA
+- Use tqdm for progress bars on training loops and data loading
+
+## Generated App Requirements for ML Projects
+When building a web UI for an ML project (React frontend):
+- Show training progress with real-time charts (use recharts for loss/accuracy curves)
+- Display model predictions with confidence scores
+- Include a file upload component for inference input
+- Show experiment comparison table if multiple runs exist
+- Use WebSocket or SSE for streaming training logs to the UI
+</ML_SPECIALIZATION>
+`;
+
+/**
+ * ML project templates metadata. These describe the 5 canonical ML project
+ * types that Mad-Lab can scaffold, stored as R2 template descriptors.
+ */
+export const ML_TEMPLATE_REGISTRY = [
+    {
+        id: 'ml-training-pipeline',
+        name: 'PyTorch Training Pipeline',
+        description: 'End-to-end PyTorch training pipeline with MLflow experiment tracking, validation, checkpointing, and mixed-precision support.',
+        tags: ['pytorch', 'mlflow', 'training', 'deep-learning'],
+        entryPoint: 'scripts/train.py',
+    },
+    {
+        id: 'ml-fastapi-serving',
+        name: 'FastAPI Model Serving',
+        description: 'Production-ready model serving endpoint with FastAPI, Pydantic schemas, ONNX support, health checks, and Dockerfile.',
+        tags: ['fastapi', 'serving', 'inference', 'docker', 'onnx'],
+        entryPoint: 'scripts/serve.py',
+    },
+    {
+        id: 'ml-data-pipeline',
+        name: 'Data Pipeline',
+        description: 'Scalable data processing pipeline using Polars and Pandas with DVC versioning, validation, and transformation stages.',
+        tags: ['pandas', 'polars', 'dvc', 'data-engineering'],
+        entryPoint: 'scripts/pipeline.py',
+    },
+    {
+        id: 'ml-rl-environment',
+        name: 'RL Environment',
+        description: 'Gymnasium-compatible reinforcement learning environment with Stable-Baselines3 training, TensorBoard logging, and evaluation.',
+        tags: ['gymnasium', 'rl', 'stable-baselines3', 'reinforcement-learning'],
+        entryPoint: 'scripts/train_rl.py',
+    },
+    {
+        id: 'ml-fine-tuning',
+        name: 'HuggingFace Fine-Tuning',
+        description: 'Parameter-efficient fine-tuning script using HuggingFace PEFT/LoRA, with W&B tracking and model card generation.',
+        tags: ['huggingface', 'peft', 'lora', 'fine-tuning', 'transformers'],
+        entryPoint: 'scripts/finetune.py',
+    },
+] as const;
+
+export type MLTemplateId = typeof ML_TEMPLATE_REGISTRY[number]['id'];

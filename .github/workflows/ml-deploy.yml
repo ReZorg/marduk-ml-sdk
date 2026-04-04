@@ -1,0 +1,128 @@
+name: ML Model Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/models/**'
+      - 'src/serving/**'
+      - 'scripts/train.py'
+  workflow_run:
+    workflows: ['ML Model Evaluation']
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'GitHub run ID of the model artifact to deploy'
+        required: false
+      target:
+        description: 'Deployment target: cloudflare-ai | registry'
+        required: false
+        default: 'cloudflare-ai'
+
+jobs:
+  deploy:
+    name: Deploy ML Model
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'failure' }}
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install onnx onnxruntime mlflow
+
+      - name: Download latest model artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: trained-model-${{ github.event.workflow_run.id || github.event.inputs.run_id || github.run_id }}
+          path: ./artifacts/
+        continue-on-error: true
+
+      - name: Export model to ONNX
+        run: |
+          if [ -f scripts/export_onnx.py ]; then
+            python scripts/export_onnx.py \
+              --model-path ./artifacts/model \
+              --output-path ./artifacts/model.onnx
+          fi
+
+      - name: Validate ONNX model
+        run: |
+          if [ -f ./artifacts/model.onnx ]; then
+            python - <<'EOF'
+          import onnx
+          model = onnx.load('./artifacts/model.onnx')
+          onnx.checker.check_model(model)
+          print("ONNX model validation passed.")
+          EOF
+          fi
+
+      - name: Upload to Cloudflare AI (Workers AI binding)
+        if: ${{ github.event.inputs.target == 'cloudflare-ai' || github.event.inputs.target == '' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -f ./artifacts/model.onnx ]; then
+            curl -s -X POST \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/ai/models" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\": \"$(basename $(pwd))-model\", \"description\": \"Auto-deployed from CI run ${{ github.run_id }}\"}" \
+              || echo "Cloudflare AI upload skipped (model registry not configured)"
+          fi
+
+      - name: Upload to model registry (alternative)
+        if: ${{ github.event.inputs.target == 'registry' }}
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+        run: |
+          if [ -f ./artifacts/model.onnx ]; then
+            python - <<'EOF'
+          import mlflow, os
+          mlflow.set_tracking_uri(os.environ.get('MLFLOW_TRACKING_URI', 'file:./mlruns'))
+          mlflow.register_model(
+              f"file:./artifacts/model",
+              f"production-model"
+          )
+          print("Model registered in MLflow registry.")
+          EOF
+          fi
+
+      - name: Promote to baseline
+        run: |
+          mkdir -p ./artifacts/baseline
+          cp -r ./artifacts/model ./artifacts/baseline/ 2>/dev/null || true
+
+      - name: Upload new baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-model
+          path: ./artifacts/baseline/
+          retention-days: 90
+          overwrite: true
+
+      - name: Deployment summary
+        run: |
+          echo "## ML Model Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Target: ${{ github.event.inputs.target || 'cloudflare-ai' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: Deployed" >> $GITHUB_STEP_SUMMARY

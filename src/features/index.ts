@@ -49,6 +49,12 @@ function registerBuiltInFeatures(): void {
 		{ ...DEFAULT_FEATURE_DEFINITIONS.general, enabled: true },
 		() => import('./general'),
 	);
+
+	// Cognitive (Mad-Lab ML) feature - ML and data science projects
+	featureRegistry.register(
+		{ ...DEFAULT_FEATURE_DEFINITIONS.cognitive, enabled: true },
+		() => import('./cognitive'),
+	);
 }
 
 // Register features immediately on module load

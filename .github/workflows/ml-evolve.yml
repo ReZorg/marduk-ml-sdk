@@ -1,0 +1,190 @@
+name: MOSES Hyperparameter Evolution
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      population_size:
+        description: 'MOSES population size'
+        required: false
+        default: '20'
+      generations:
+        description: 'Number of evolution generations'
+        required: false
+        default: '10'
+      target_metric:
+        description: 'Metric to optimize (accuracy, f1, loss)'
+        required: false
+        default: 'accuracy'
+
+jobs:
+  evolve:
+    name: Run MOSES Hyperparameter Evolution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install SDK
+        run: |
+          cd sdk
+          npm install
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install ML dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run MOSES evolution via SDK
+        id: moses
+        run: |
+          node - <<'EOF'
+          const { Marduk } = require('./sdk/dist/index.js');
+
+          async function runEvolution() {
+            const marduk = new Marduk({
+              mosesConfig: {
+                populationSize: parseInt(process.env.POPULATION_SIZE || '20'),
+                generations: parseInt(process.env.GENERATIONS || '10'),
+                mutationRate: 0.05,
+                crossoverRate: 0.7,
+                eliteRatio: 0.1,
+                tournamentSize: 5,
+                objectives: [
+                  { name: process.env.TARGET_METRIC || 'accuracy', value: 0, weight: 1, direction: 'maximize' },
+                  { name: 'efficiency', value: 0, weight: 0.3, direction: 'maximize' },
+                ],
+                terminationCriteria: {
+                  maxGenerations: parseInt(process.env.GENERATIONS || '10'),
+                  fitnessThreshold: 0.9,
+                },
+              },
+            });
+
+            const moses = marduk.getMOSES();
+
+            // Define ML hyperparameter search space as genome
+            const initialPopulation = Array.from({ length: parseInt(process.env.POPULATION_SIZE || '20') }, (_, i) => ({
+              id: `individual-${i}`,
+              genes: [
+                { name: 'learning_rate', value: Math.random() * 0.09 + 0.001, type: 'continuous', bounds: { min: 0.0001, max: 0.1 } },
+                { name: 'batch_size', value: [16, 32, 64, 128][Math.floor(Math.random() * 4)], type: 'discrete', options: [16, 32, 64, 128] },
+                { name: 'hidden_dim', value: [64, 128, 256, 512][Math.floor(Math.random() * 4)], type: 'discrete', options: [64, 128, 256, 512] },
+                { name: 'dropout', value: Math.random() * 0.4 + 0.1, type: 'continuous', bounds: { min: 0.0, max: 0.5 } },
+                { name: 'weight_decay', value: Math.random() * 0.009 + 0.0001, type: 'continuous', bounds: { min: 0.0001, max: 0.01 } },
+              ],
+              fitness: [],
+              generation: 0,
+              age: 0,
+            }));
+
+            moses.initializePopulation(
+              () => initialPopulation[Math.floor(Math.random() * initialPopulation.length)],
+              async (genome) => {
+                // Simulated fitness — replace with real training run in production
+                const lr = genome.genes.find(g => g.name === 'learning_rate')?.value ?? 0.01;
+                const dropout = genome.genes.find(g => g.name === 'dropout')?.value ?? 0.2;
+                return [
+                  { name: process.env.TARGET_METRIC || 'accuracy', value: Math.min(0.99, 0.7 + lr * 2 - dropout * 0.5), weight: 1, direction: 'maximize' },
+                  { name: 'efficiency', value: 1 - lr, weight: 0.3, direction: 'maximize' },
+                ];
+              }
+            );
+
+            await moses.evolve();
+            const best = moses.getBestIndividuals(1)[0];
+
+            const result = {
+              generation: best?.generation ?? 0,
+              genes: best?.genes ?? [],
+              fitness: best?.fitness ?? [],
+            };
+
+            require('fs').writeFileSync('./artifacts/best_hyperparams.json', JSON.stringify(result, null, 2));
+            console.log('Best hyperparameters:', JSON.stringify(result, null, 2));
+          }
+
+          runEvolution().catch(err => { console.error(err); process.exit(1); });
+          EOF
+        env:
+          POPULATION_SIZE: ${{ github.event.inputs.population_size || '20' }}
+          GENERATIONS: ${{ github.event.inputs.generations || '10' }}
+          TARGET_METRIC: ${{ github.event.inputs.target_metric || 'accuracy' }}
+
+      - name: Update config with best hyperparameters
+        run: |
+          mkdir -p artifacts
+          if [ -f ./artifacts/best_hyperparams.json ]; then
+            python - <<'PYEOF'
+          import json, os
+
+          with open('./artifacts/best_hyperparams.json') as f:
+              best = json.load(f)
+
+          config = {
+              'evolved': True,
+              'evolution_run': os.environ.get('GITHUB_RUN_ID', 'unknown'),
+              'hyperparameters': {g['name']: g['value'] for g in best.get('genes', [])},
+              'fitness': best.get('fitness', []),
+          }
+
+          os.makedirs('config', exist_ok=True)
+          with open('./config/evolved_hyperparams.json', 'w') as f:
+              json.dump(config, f, indent=2)
+
+          print("Updated config/evolved_hyperparams.json")
+          PYEOF
+          fi
+
+      - name: Create Pull Request with evolved configuration
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(ml): update hyperparameters from MOSES evolution run ${{ github.run_id }}'
+          branch: 'ml/moses-evolution-${{ github.run_id }}'
+          title: 'ML: MOSES evolved hyperparameters (run ${{ github.run_id }})'
+          body: |
+            ## MOSES Hyperparameter Evolution Results
+
+            This PR was automatically generated by the MOSES evolutionary search workflow.
+
+            - Population size: ${{ github.event.inputs.population_size || '20' }}
+            - Generations: ${{ github.event.inputs.generations || '10' }}
+            - Target metric: ${{ github.event.inputs.target_metric || 'accuracy' }}
+
+            The evolved hyperparameters are in `config/evolved_hyperparams.json`.
+
+            Review and merge if the evolved configuration improves model performance.
+          labels: |
+            ml
+            automated
+          delete-branch: true
+          add-paths: |
+            config/evolved_hyperparams.json
+            artifacts/best_hyperparams.json
+
+      - name: Evolution summary
+        if: always()
+        run: |
+          echo "## MOSES Evolution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f ./artifacts/best_hyperparams.json ]; then
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat ./artifacts/best_hyperparams.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi

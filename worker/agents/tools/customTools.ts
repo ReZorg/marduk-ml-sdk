@@ -19,6 +19,7 @@ import { createGetRuntimeErrorsTool } from './toolkit/get-runtime-errors';
 import { createWaitForGenerationTool } from './toolkit/wait-for-generation';
 import { createWaitForDebugTool } from './toolkit/wait-for-debug';
 import { createGitTool } from './toolkit/git';
+import { createMardukArchonBuildTool } from './toolkit/marduk-archon-build';
 import { ICodingAgent } from '../services/interfaces/ICodingAgent';
 import { Message } from '../inferutils/common';
 import { ChatCompletionMessageFunctionToolCall } from 'openai/resources';
@@ -57,6 +58,8 @@ export function buildTools(
         createAlterBlueprintTool(agent, logger),
         // Git tool (safe version - no reset for user conversations)
         createGitTool(agent, logger, { excludeCommands: ['reset'] }),
+        // Marduk Archon: build ML-specialized sub-agents on demand
+        createMardukArchonBuildTool(agent, logger),
         // Deep autonomous debugging assistant tool
         createDeepDebuggerTool(agent, logger, toolRenderer, streamCb),
     ];
