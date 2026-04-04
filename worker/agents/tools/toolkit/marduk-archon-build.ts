@@ -9,10 +9,9 @@
 import { tool, t } from '../types';
 import { StructuredLogger } from '../../../logger';
 import { buildArchonMLAgent } from '../../../services/marduk/MardukService';
-import type { ICodingAgent } from 'worker/agents/services/interfaces/ICodingAgent';
 import type { ArchonAgentConfig } from '../../../services/marduk/MardukService';
 
-export function createMardukArchonBuildTool(agent: ICodingAgent, logger: StructuredLogger) {
+export function createMardukArchonBuildTool(env: Env, logger: StructuredLogger) {
 	return tool({
 		name: 'marduk_archon_build',
 		description:
@@ -37,15 +36,6 @@ export function createMardukArchonBuildTool(agent: ICodingAgent, logger: Structu
 				})),
 				objectives: [goal],
 			};
-
-			const env = (agent as unknown as { env: Env }).env;
-			if (!env) {
-				logger.warn('Env not accessible from agent; Archon build skipped');
-				return JSON.stringify({
-					error: 'Environment bindings not available',
-					agentName,
-				});
-			}
 
 			const result = await buildArchonMLAgent(env, config);
 			logger.info('Archon ML agent built', { agentId: result.agentId });

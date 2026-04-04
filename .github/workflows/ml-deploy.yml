@@ -80,6 +80,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [ -f ./artifacts/model.onnx ]; then
+            # NOTE: Replace this endpoint with the actual Cloudflare Workers AI model upload
+            # API endpoint once it becomes available in the Cloudflare API documentation.
+            # See: https://developers.cloudflare.com/workers-ai/
             curl -s -X POST \
               "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/ai/models" \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \

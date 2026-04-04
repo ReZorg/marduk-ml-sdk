@@ -38,6 +38,7 @@ jobs:
         run: |
           cd sdk
           npm install
+          npm run build
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -115,6 +116,7 @@ jobs:
               fitness: best?.fitness ?? [],
             };
 
+            require('fs').mkdirSync('./artifacts', { recursive: true });
             require('fs').writeFileSync('./artifacts/best_hyperparams.json', JSON.stringify(result, null, 2));
             console.log('Best hyperparameters:', JSON.stringify(result, null, 2));
           }

@@ -45,6 +45,7 @@ export function buildTools(
     logger: StructuredLogger,
     toolRenderer: RenderToolCall,
     streamCb: (chunk: string) => void,
+    env?: Env,
 ): ToolDefinition<any, any>[] {
     return [
         toolWebSearchDefinition,
@@ -58,8 +59,8 @@ export function buildTools(
         createAlterBlueprintTool(agent, logger),
         // Git tool (safe version - no reset for user conversations)
         createGitTool(agent, logger, { excludeCommands: ['reset'] }),
-        // Marduk Archon: build ML-specialized sub-agents on demand
-        createMardukArchonBuildTool(agent, logger),
+        // Marduk Archon: build ML-specialized sub-agents on demand (only when env is available)
+        ...(env ? [createMardukArchonBuildTool(env, logger)] : []),
         // Deep autonomous debugging assistant tool
         createDeepDebuggerTool(agent, logger, toolRenderer, streamCb),
     ];

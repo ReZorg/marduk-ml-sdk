@@ -51,5 +51,3 @@ export const CognitivePreview = forwardRef<HTMLIFrameElement, PreviewComponentPr
 	},
 );
 
-CognitivePreview.displayName = 'CognitivePreview';
-

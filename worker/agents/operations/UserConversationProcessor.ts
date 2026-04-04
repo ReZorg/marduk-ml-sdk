@@ -353,7 +353,8 @@ export class UserConversationProcessor extends AgentOperation<GenerationContext,
                 agent,
                 logger,
                 toolCallRenderer,
-                (chunk: string) => inputs.conversationResponseCallback(chunk, aiConversationId, true)
+                (chunk: string) => inputs.conversationResponseCallback(chunk, aiConversationId, true),
+                env
             ).map(td => ({
                 ...td,
                 onStart: (_tc: ChatCompletionMessageFunctionToolCall, args: Record<string, unknown>) => Promise.resolve(toolCallRenderer({ name: td.name, status: 'start', args })),
@@ -472,9 +473,9 @@ export class UserConversationProcessor extends AgentOperation<GenerationContext,
             }
 
             // Persist conversation turn as episodic memory in Marduk KV
-            const sessionId = options.agentId ?? 'unknown';
+            const agentId = options.agentId ?? 'unknown';
             storeConversationEpisode(env, {
-                sessionId,
+                sessionId: agentId,
                 userMessage: userMessage.slice(0, 500),
                 assistantSummary: extractedUserResponse.slice(0, 500),
                 timestamp: Date.now(),

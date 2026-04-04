@@ -168,7 +168,7 @@ export async function buildArchonMLAgent(
 	config: ArchonAgentConfig,
 ): Promise<ArchonBuildResult> {
 	const tools = resolveToolsFromCapabilities(config.capabilities);
-	const agentId = `archon-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+	const agentId = `archon-${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
 
 	const result: ArchonBuildResult = {
 		agentId,
@@ -217,7 +217,7 @@ export async function runAutonomyHeartbeat(env: Env): Promise<AutonomyReport> {
 		}
 	}
 
-	const capacity = parseInt(env.MARDUK_MEMORY_CAPACITY ?? '1000', 10);
+	const capacity = Math.max(1, parseInt(env.MARDUK_MEMORY_CAPACITY ?? '1000', 10));
 	const usagePct = episodicCount / capacity;
 
 	const suggestions: AutonomyReport['suggestions'] = [];

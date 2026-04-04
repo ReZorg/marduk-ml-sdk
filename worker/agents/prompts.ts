@@ -1122,7 +1122,7 @@ export function isMLQuery(query: string): boolean {
         'huggingface', 'transformers', 'peft', 'lora', 'mlflow',
         'wandb', 'weights & biases', 'dvc', 'kedro', 'gymnasium',
         'reinforcement learning', 'rl agent', 'neural network', 'train model',
-        'fine-tun', 'dataset', 'pandas', 'polars', 'data pipeline',
+        'fine-tune', 'dataset', 'pandas', 'polars', 'data pipeline',
         'model serving', 'fastapi model', 'inference endpoint', 'embedding',
         'classification', 'regression', 'clustering', 'automl',
         'machine learning', 'deep learning', 'llm', 'language model',
