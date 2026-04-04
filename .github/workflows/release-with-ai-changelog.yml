@@ -19,10 +19,7 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@v4
         with:
-          release-type: node
-          package-name: vibesdk
-          extra-files: |
-            bun.lock
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
   dispatch-ai-changelog:
     needs: release-please

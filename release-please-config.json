@@ -1,0 +1,9 @@
+{
+  "release-type": "node",
+  "packages": {
+    ".": {
+      "package-name": "vibesdk",
+      "extra-files": ["bun.lock"]
+    }
+  }
+}
