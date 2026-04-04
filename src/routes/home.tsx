@@ -66,9 +66,13 @@ export default function Home() {
 
 
 	const placeholderPhrases = useMemo(() => [
-		"todo list app",
-		"F1 fantasy game",
-		"personal finance tracker"
+		"PyTorch image classifier with training loop",
+		"FastAPI model serving endpoint with Docker",
+		"ML data pipeline with Pandas and DVC",
+		"reinforcement learning environment with Gymnasium",
+		"HuggingFace fine-tuning script with LoRA",
+		"MLflow experiment tracking dashboard",
+		"scikit-learn AutoML pipeline with cross-validation",
 	], []);
 	const [currentPlaceholderPhraseIndex, setCurrentPlaceholderPhraseIndex] = useState(0);
 	const [currentPlaceholderText, setCurrentPlaceholderText] = useState("");
@@ -207,6 +211,9 @@ export default function Home() {
 						<h1 className="text-shadow-sm text-shadow-red-200 dark:text-shadow-red-900 text-accent font-medium leading-[1.1] tracking-tight text-5xl w-full mb-4 bg-clip-text bg-gradient-to-r from-text-primary to-text-primary/90">
 							What should we build today?
 						</h1>
+						<p className="text-sm text-text-tertiary mb-4 w-full">
+							Describe your ML project and Mad-Lab will generate, deploy, and optimize it for you.
+						</p>
 
 						<form
 							method="POST"
@@ -321,7 +328,7 @@ export default function Home() {
 							className={clsx('max-w-6xl mx-auto px-4 z-10', images.length > 0 ? 'mt-10' : 'mt-16 mb-8')}
 						>
 							<div className='flex flex-col items-start'>
-								<h2 className="text-2xl font-medium text-text-secondary/80">Discover Apps built by the community</h2>
+								<h2 className="text-2xl font-medium text-text-secondary/80">Discover ML projects built by the community</h2>
 								<div ref={discoverLinkRef} className="text-md font-light mb-4 text-text-tertiary hover:underline underline-offset-4 select-text cursor-pointer" onClick={() => navigate('/discover')} >View All</div>
 								<motion.div
 									layout

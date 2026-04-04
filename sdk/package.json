@@ -1,6 +1,8 @@
 {
-	"name": "@cf-vibesdk/sdk",
-	"version": "0.0.9",
+	"name": "@marduk/ml-sdk",
+	"version": "0.1.0",
+	"description": "Marduk's Lab ML SDK — cognitive architecture, ML workflow orchestration, and autonomous DevOps",
+	"keywords": ["marduk", "ml", "machine-learning", "cognitive-architecture", "moses", "autonomous", "devops", "llm"],
 	"type": "module",
 	"exports": {
 		".": {

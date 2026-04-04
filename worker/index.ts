@@ -10,6 +10,7 @@ import { isOriginAllowed } from './config/security';
 import { proxyToSandbox } from './services/sandbox/request-handler';
 import { handleGitProtocolRequest, isGitProtocolRequest } from './api/handlers/git-protocol';
 import { getAgentStub } from './agents';
+import { runAutonomyHeartbeat } from './services/marduk/MardukService';
 
 // Durable Object and Service exports
 export { UserAppSandboxService } from './services/sandbox/sandboxSdkClient';
@@ -215,3 +216,31 @@ export default worker;
 
 // Wrap the entire worker with Sentry for comprehensive error monitoring.
 // export default Sentry.withSentry(sentryOptions, worker);
+
+/**
+ * Scheduled handler — Marduk Cognitive Autonomy Heartbeat.
+ *
+ * Wrangler cron triggers (every 5 min, hourly) invoke this handler to run
+ * the Marduk AutonomyCoordinator analysis cycle. Results are stored in MARDUK_KV
+ * for the agent layer to surface optimization suggestions.
+ */
+export const scheduled: ExportedHandlerScheduledHandler<Env> = async (
+	event,
+	env,
+	_ctx,
+) => {
+	const heartbeatLogger = createLogger('MardukHeartbeat');
+	heartbeatLogger.info('Autonomy heartbeat triggered', { cron: event.cron });
+
+	try {
+		const report = await runAutonomyHeartbeat(env);
+		heartbeatLogger.info('Autonomy heartbeat complete', {
+			status: report.status,
+			suggestions: report.suggestions.length,
+		});
+	} catch (err: unknown) {
+		heartbeatLogger.error('Autonomy heartbeat failed', {
+			error: err instanceof Error ? err.message : String(err),
+		});
+	}
+};

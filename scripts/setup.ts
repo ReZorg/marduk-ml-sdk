@@ -60,7 +60,7 @@ class SetupManager {
 	});
 
 	constructor() {
-		console.log('🚀 VibeSDK Development Setup');
+		console.log("Marduk's Lab — Development Setup");
 		console.log('============================\n');
 	}
 
@@ -662,7 +662,7 @@ class SetupManager {
 	}
 
 	private async ensureKVNamespace(binding: string): Promise<{ id: string; title: string }> {
-		const namespaceName = `vibesdk-${binding.toLowerCase()}-local`;
+		const namespaceName = `madlab-${binding.toLowerCase()}-local`;
 
 		try {
 			// Check if namespace exists using direct API call
@@ -1788,7 +1788,7 @@ class SetupManager {
 			}
 		}
 
-		console.log('\n✨ Happy coding with VibeSDK! ✨');
+		console.log('\nHappy building with Mad-Lab!');
 	}
 
 	private async updateWorkerConfiguration(): Promise<void> {

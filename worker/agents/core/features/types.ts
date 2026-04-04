@@ -12,6 +12,7 @@ export interface PlatformCapabilitiesConfig {
 		app: { enabled: boolean };
 		presentation: { enabled: boolean };
 		general: { enabled: boolean };
+		cognitive: { enabled: boolean };
 	};
 	version: string;
 }
@@ -177,6 +178,24 @@ export const DEFAULT_FEATURE_DEFINITIONS: Record<ProjectType, Omit<FeatureDefini
 			hasCustomSidebar: false,
 			hasCustomFileFilter: false,
 			behaviorType: 'agentic',
+		},
+	},
+	cognitive: {
+		id: 'cognitive',
+		name: "Mad-Lab ML",
+		description: 'ML and data science projects with Marduk cognitive architecture',
+		capabilities: {
+			hasPreview: true,
+			hasLiveReload: true,
+			requiresSandbox: true,
+			requiresWebSocket: true,
+			supportedViews: ['editor', 'preview', 'docs', 'blueprint'],
+			defaultView: 'editor',
+			supportedExports: ['github'],
+			hasCustomHeaderActions: true,
+			hasCustomSidebar: false,
+			hasCustomFileFilter: false,
+			behaviorType: 'phasic',
 		},
 	},
 };

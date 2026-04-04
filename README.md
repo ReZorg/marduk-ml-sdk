@@ -1,19 +1,18 @@
-# 🧡 Cloudflare Vibe SDK
+# Marduk's Lab — Mad-Lab ML Platform
 
-> **An open source full-stack AI webapp generator** – Deploy your own instance of Cloudflare VibeSDK, an AI vibe coding platform that you can run and customize yourself.
+> **An autonomous ML-specialized DevOps platform** — Marduk's Lab (Mad-Lab) combines an AI-powered full-stack application generator with a cognitive architecture framework, enabling autonomous code generation, ML workflow orchestration, and self-optimizing systems.
 
 <div align="center">
 
-
-## 🚀 Live Demo
+## Live Demo
 
 **[build.cloudflare.dev](https://build.cloudflare.dev)**
 
-*Explore VibeSDK Build before deploying your own stack.*
+*Explore the platform before deploying your own stack.*
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/vibesdk)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ReZorg/marduk-ml-sdk)
 
-**👆 Click to deploy your own instance!**
+**Deploy your own instance**
 
 *Follow the setup guide below to configure required services*
 
@@ -21,64 +20,69 @@
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=cloudflare/vibesdk&type=Date)](https://www.star-history.com/#cloudflare/vibesdk&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=ReZorg/marduk-ml-sdk&type=Date)](https://www.star-history.com/#ReZorg/marduk-ml-sdk&Date)
 
 ---
 
-## ✨ What is Cloudflare VibeSDK?
+## What is Marduk's Lab?
 
-Cloudflare VibeSDK is an open source AI vibe coding platform built on Cloudflare's developer platform. If you're building an AI-powered platform for building applications, this is a great example that you can deploy and customize to build the whole platform yourself. Once the platform is deployed, users can say what they want to build in natural language, and the AI agent will create and deploy the application. 
+Marduk's Lab (Mad-Lab) is an open-source, ML-specialized autonomous DevOps platform built on Cloudflare's infrastructure. It merges two powerful systems:
 
-**🌐 [Experience it live at build.cloudflare.dev](https://build.cloudflare.dev)** – Try it out before deploying your own instance!
+- **Application Generator** — Users describe what they want to build in natural language; the AI agent generates, previews, and deploys full-stack applications including ML-focused projects (training pipelines, model servers, data pipelines).
+- **Marduk Cognitive SDK** — A production-ready cognitive architecture (`sdk/src/marduk/`) providing memory systems, task management, evolutionary optimization (MOSES), neural-symbolic integration, and autonomous self-improvement. The SDK is wired into the platform's backend to enable associative memory across sessions, archon-driven agent building, and autonomy heartbeat optimization.
 
-## 🎯 Perfect For
+**Perfect for ML engineers and data scientists** who want to go from idea to deployed ML application without boilerplate.
 
-### Companies building AI-powered platforms
-Run your own solution that allows users to build applications in natural language. Customize the AI behavior, control the generated code patterns, integrate your own component libraries, and keep all customer data within your infrastructure. Perfect for startups wanting to enter the AI development space or established companies adding AI capabilities to their existing developer tools.  
+## Perfect For
 
-### Internal development
-Enable non-technical teams to create the tools they need without waiting for engineering resources. Marketing can build landing pages, sales can create custom dashboards, and operations can automate workflows, all by describing what they want. 
+### ML Engineers building AI/ML systems
+Generate PyTorch training pipelines, FastAPI model servers, HuggingFace fine-tuning scripts, and RL environments — all from natural language descriptions with MLOps best practices baked in.
 
-### SaaS platforms 
-Let your customers extend your product's functionality without learning your API or writing code. They can describe custom integrations, build specialized workflows, or create tailored interfaces specific to their business needs. 
+### Teams building AI-powered platforms
+Deploy your own instance to let users build ML applications in natural language. Marduk's cognitive layer remembers context across sessions and autonomously optimizes system performance.
+
+### Internal ML tooling
+Enable data scientists and researchers to create custom dashboards, data pipelines, and experiment tracking UIs without waiting on engineering resources.
 
 ---
 
-### 🎯 Key Features
+### Key Features
 
-🤖 **AI Code Generation** – Phase-wise development with intelligent error correction  
-⚡ **Live Previews** – App previews running in sandboxed containers  
-💬 **Interactive Chat** – Guide development through natural conversation  
-📱 **Modern Stack** – Generates React + TypeScript + Tailwind apps  
-🚀 **One-Click Deploy** – Deploy generated apps to Workers for Platforms  
-📦 **GitHub Integration** – Export code directly to your repositories  
+**AI Code Generation** — Phase-wise development with intelligent error correction
+**ML Specialization** — Generates Python ML stacks (PyTorch, scikit-learn, HuggingFace) and MLOps tooling
+**Live Previews** — App previews running in sandboxed Cloudflare Containers
+**Interactive Chat** — Guide development through natural conversation with persistent cognitive memory
+**Cognitive Architecture** — Marduk SDK: memory systems, MOSES evolutionary engine, hypergraph neural networks
+**Autonomous Optimization** — Self-analyzing autonomy system optimizes the platform on a scheduled heartbeat
+**Archon Agent Builder** — On-demand ML-specialized sub-agents built by the Archon system
+**One-Click Deploy** — Deploy generated apps to Workers for Platforms
+**GitHub Integration** — Export code directly to your repositories
 
-### 🏗️ Built on Cloudflare's Platform
-
-Cloudflare VibeSDK Build utilizes the full Cloudflare developer ecosystem:
+### Built on Cloudflare's Platform
 
 - **Frontend**: React + Vite with modern UI components
-- **Backend**: Workers with Durable Objects for AI agents  
+- **Backend**: Workers with Durable Objects for AI agents
 - **Database**: D1 (SQLite) with Drizzle ORM
-- **AI**: Multiple LLM providers via AI Gateway
-- **Containers**: Sandboxed app previews and execution
-- **Storage**: R2 buckets for templates, KV for sessions
+- **AI**: Multiple LLM providers via AI Gateway (OpenAI, Anthropic, Gemini, Groq)
+- **Cognitive Layer**: Marduk SDK with KV-backed memory and MOSES evolution
+- **Containers**: Sandboxed app previews and ML execution environments
+- **Storage**: R2 buckets for templates and model artifacts, KV for sessions
 - **Deployment**: Workers for Platforms with dispatch namespaces
 
 ### SDK for Programmatic Access
 
-Build apps programmatically using the official TypeScript SDK:
+Build applications and ML workflows programmatically using the TypeScript SDK:
 
 ```bash
-npm install @cf-vibesdk/sdk
+npm install @marduk/ml-sdk
 ```
 
 ```ts
-import { PhasicClient } from '@cf-vibesdk/sdk';
+import { PhasicClient } from '@marduk/ml-sdk';
 
 const client = new PhasicClient({
-  baseUrl: 'https://build.cloudflare.dev',
-  apiKey: process.env.VIBESDK_API_KEY!,
+  baseUrl: 'https://your-madlab-instance.dev',
+  apiKey: process.env.MADLAB_API_KEY!,
 });
 
 const session = await client.build('Build a simple hello world page.', {
@@ -105,9 +109,9 @@ Before clicking "Deploy to Cloudflare", have these ready:
 ### 🔑 Required API Key
 - **Google Gemini API Key** - Get from [ai.google.dev](https://ai.google.dev)
 
-Once you click "Deploy to Cloudflare", you'll be taken to your Cloudflare dashboard where you can configure your VibeSDK deployment with these variables. 
+Once you click "Deploy to Cloudflare", you'll be taken to your Cloudflare dashboard where you can configure your Mad-Lab deployment with these variables. 
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/vibesdk)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ReZorg/marduk-ml-sdk)
 
 ### 🔑 What you'll configure
 
@@ -132,7 +136,7 @@ Adjust the placeholder `abc`/`xyz` parts to match your domain. DNS propagation c
 
 ### 🏗️ Sandbox Instance Configuration (Optional)
 
-VibeSDK uses Cloudflare Containers to run generated applications in isolated environments. You can configure the container performance tier based on your needs and Cloudflare plan.
+Mad-Lab uses Cloudflare Containers to run generated applications in isolated environments. You can configure the container performance tier based on your needs and Cloudflare plan.
 
 #### Available Instance Types
 

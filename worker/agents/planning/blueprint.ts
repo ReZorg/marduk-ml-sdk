@@ -320,6 +320,14 @@ const PROJECT_TYPE_BLUEPRINT_GUIDANCE: Record<ProjectType, string> = {
 - If the outcome is documentation/specs/notes, prefer Markdown/MDX and do not assume any runtime.
 - If a slide deck is helpful, outline the deck structure and content. Avoid assuming a specific file layout; keep the plan flexible.
 - Keep dependencies minimal; introduce runtime only when clearly needed.`,
+    cognitive: `## ML / Data Science Project Context
+- Generate Python-based ML projects following the Mad-Lab ML conventions.
+- Structure: data/ models/ training/ evaluation/ serving/ config/ scripts/
+- Use PyTorch as default framework; scikit-learn for classical ML; HuggingFace for NLP/LLMs.
+- Every training run must log metrics to MLflow or W&B.
+- Include a FastAPI serving endpoint with /health, /predict, and /metrics routes.
+- Seed everything for reproducibility; document tensor shapes; pin dependency versions.
+- Provide a React frontend for visualizing training progress and model predictions.`,
 };
 
 const getProjectTypeGuidance = (projectType: ProjectType): string =>

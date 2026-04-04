@@ -21,6 +21,7 @@ import { GenerationContext } from "../domain/values/GenerationContext";
 import { compactifyContext } from "../utils/conversationCompactifier";
 import { ChatCompletionMessageFunctionToolCall } from "openai/resources";
 import { prepareMessagesForInference } from "../utils/common";
+import { storeConversationEpisode } from "../../services/marduk/MardukService";
 
 // Constants
 const CHUNK_SIZE = 64;
@@ -352,7 +353,8 @@ export class UserConversationProcessor extends AgentOperation<GenerationContext,
                 agent,
                 logger,
                 toolCallRenderer,
-                (chunk: string) => inputs.conversationResponseCallback(chunk, aiConversationId, true)
+                (chunk: string) => inputs.conversationResponseCallback(chunk, aiConversationId, true),
+                env
             ).map(td => ({
                 ...td,
                 onStart: (_tc: ChatCompletionMessageFunctionToolCall, args: Record<string, unknown>) => Promise.resolve(toolCallRenderer({ name: td.name, status: 'start', args })),
@@ -469,6 +471,20 @@ export class UserConversationProcessor extends AgentOperation<GenerationContext,
                     .filter((m): m is ConversationMessage => !!m);
                 storageRunning = [summaryMessage, ...preservedTail];
             }
+
+            // Persist conversation turn as episodic memory in Marduk KV
+            const agentId = options.agentId ?? 'unknown';
+            storeConversationEpisode(env, {
+                sessionId: agentId,
+                userMessage: userMessage.slice(0, 500),
+                assistantSummary: extractedUserResponse.slice(0, 500),
+                timestamp: Date.now(),
+                tags: ['conversation'],
+            }).catch((err: unknown) => {
+                logger.warn('Failed to persist episodic memory', {
+                    error: err instanceof Error ? err.message : String(err),
+                });
+            });
 
             return {
                 conversationResponse,

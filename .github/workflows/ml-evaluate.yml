@@ -1,0 +1,114 @@
+name: ML Model Evaluation
+
+on:
+  workflow_run:
+    workflows: ['ML Training Pipeline']
+    types:
+      - completed
+  pull_request:
+    paths:
+      - 'src/models/**'
+      - 'src/training/**'
+      - 'scripts/train.py'
+      - 'scripts/evaluate.py'
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'GitHub run ID of the training artifact to evaluate'
+        required: true
+
+jobs:
+  evaluate:
+    name: Evaluate Model
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install mlflow pytest
+
+      - name: Download trained model artifact
+        uses: actions/download-artifact@v4.1.3
+        with:
+          name: trained-model-${{ github.event.workflow_run.id || github.event.inputs.run_id || github.run_id }}
+          path: ./artifacts/
+        continue-on-error: true
+
+      - name: Download baseline model (if exists)
+        uses: actions/download-artifact@v4.1.3
+        with:
+          name: baseline-model
+          path: ./artifacts/baseline/
+        continue-on-error: true
+
+      - name: Run full evaluation suite
+        run: |
+          python scripts/evaluate.py \
+            --model-path ./artifacts/model \
+            --baseline-path ./artifacts/baseline \
+            --output-path ./artifacts/evaluation_report.json \
+            --format markdown > ./artifacts/evaluation_report.md 2>&1 || true
+
+      - name: Compare against baseline
+        id: compare
+        run: |
+          if [ -f ./artifacts/evaluation_report.json ]; then
+            python - <<'EOF'
+          import json, sys, os
+          with open('./artifacts/evaluation_report.json') as f:
+              report = json.load(f)
+          regression = report.get('regression', False)
+          improvement = report.get('improvement_pct', 0)
+          print(f"Regression: {regression}")
+          print(f"Improvement: {improvement:.2f}%")
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write(f"regression={str(regression).lower()}\n")
+              out.write(f"improvement={improvement:.2f}\n")
+          EOF
+          fi
+
+      - name: Upload evaluation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-report-${{ github.run_id }}
+          path: ./artifacts/evaluation_report.*
+          retention-days: 90
+
+      - name: Post evaluation results as PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '## ML Model Evaluation Results\n\n';
+            if (fs.existsSync('./artifacts/evaluation_report.md')) {
+              body += fs.readFileSync('./artifacts/evaluation_report.md', 'utf8');
+            } else {
+              body += 'Evaluation report not available. Check workflow logs.';
+            }
+            body += `\n\n*Run ID: ${context.runId}*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+
+      - name: Fail on regression
+        if: steps.compare.outputs.regression == 'true'
+        run: |
+          echo "Model regression detected. Blocking promotion."
+          exit 1
