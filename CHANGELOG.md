@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.6.0](https://github.com/ReZorg/marduk-ml-sdk/compare/vibesdk-v1.5.0...vibesdk-v1.6.0) (2026-05-26)
+
+
+### Features
+
+* implement Marduk's Lab (Mad-Lab) ML platform ([ac55972](https://github.com/ReZorg/marduk-ml-sdk/commit/ac5597272058eb854b4fd1202247e9b965c1abcc))
+* Marduk's Lab (Mad-Lab) — ML-specialized autonomous DevOps platform ([b4d623b](https://github.com/ReZorg/marduk-ml-sdk/commit/b4d623b079922cc5bbd1075d6c4b9c8487f821df))
+* **wrangler:** integrate P9Fstyx cognitive kernel and AtomSpace bindings ([6f25358](https://github.com/ReZorg/marduk-ml-sdk/commit/6f253581eab57e52b9ab614906b6b429e5b16c9d))
+
+
+### Bug Fixes
+
+* address code review feedback ([a59f062](https://github.com/ReZorg/marduk-ml-sdk/commit/a59f062780ff842786b32481ef833f919708a6e9))
+* **ci:** install Bun in MOSES evolution workflow ([0d15cd7](https://github.com/ReZorg/marduk-ml-sdk/commit/0d15cd71121405119f37b891f6f1abe3880e0d99))
+* configure release-please with PAT token and manifest ([c6235b1](https://github.com/ReZorg/marduk-ml-sdk/commit/c6235b15f034c57e9b0546c4252b1faa60fedd0a))
+* configure release-please with PAT token and manifest ([93cc7f3](https://github.com/ReZorg/marduk-ml-sdk/commit/93cc7f3f5f91ca412a8bfcd64ea2f91dc303e37e))
+* Created database and updated database_id ([edbf0a3](https://github.com/ReZorg/marduk-ml-sdk/commit/edbf0a3486c359ac0c0cf6039a43981009aa44fb))
+* Created namespace 'marduk-store' (1ecc1e3d85c745d387c675dd7bfd4d93) ([6092b28](https://github.com/ReZorg/marduk-ml-sdk/commit/6092b287c8c5a262827cf36f60439e3b2b583482))
+* pin actions/download-artifact to v4.1.3 to fix arbitrary file write CVE ([60391a3](https://github.com/ReZorg/marduk-ml-sdk/commit/60391a3e9adbf26b43b20d306e4a21c40bad3d29))
+* use default github token in release-please workflow ([9d74595](https://github.com/ReZorg/marduk-ml-sdk/commit/9d74595fc89ae73e29a71f7f25c9be977e4686ed))
+* **wrangler:** integrate Marduk cognitive architecture bindings from mad9ml ([fe5a03e](https://github.com/ReZorg/marduk-ml-sdk/commit/fe5a03e392039a7d63e881352a1fb2efd1c66040))
+* **wrangler:** replace D1 database ID with newly created marduk-ml-sdk-db ([edbf0a3](https://github.com/ReZorg/marduk-ml-sdk/commit/edbf0a3486c359ac0c0cf6039a43981009aa44fb))
+* **wrangler:** replace MardukStore KV namespace ID with valid account namespace ([6092b28](https://github.com/ReZorg/marduk-ml-sdk/commit/6092b287c8c5a262827cf36f60439e3b2b583482))
+* **wrangler:** replace placeholder KV namespace IDs with real Cloudflare IDs ([df9a670](https://github.com/ReZorg/marduk-ml-sdk/commit/df9a670208bcddfe13a9aab22f8d780878143c25))
+
 ## [1.5.0](https://github.com/cloudflare/vibesdk/compare/v1.4.0...v1.5.0) (2026-02-03)
 
 
