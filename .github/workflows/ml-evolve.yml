@@ -37,7 +37,7 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: 1.x
 
       - name: Install SDK
         run: |
