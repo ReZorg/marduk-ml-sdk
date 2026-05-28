@@ -1214,46 +1214,4 @@ When building a web UI for an ML project (React frontend):
 </ML_SPECIALIZATION>
 `;
 
-/**
- * ML project templates metadata. These describe the 5 canonical ML project
- * types that Mad-Lab can scaffold, stored as R2 template descriptors.
- */
-export const ML_TEMPLATE_REGISTRY = [
-    {
-        id: 'ml-training-pipeline',
-        name: 'PyTorch Training Pipeline',
-        description: 'End-to-end PyTorch training pipeline with MLflow experiment tracking, validation, checkpointing, and mixed-precision support.',
-        tags: ['pytorch', 'mlflow', 'training', 'deep-learning'],
-        entryPoint: 'scripts/train.py',
-    },
-    {
-        id: 'ml-fastapi-serving',
-        name: 'FastAPI Model Serving',
-        description: 'Production-ready model serving endpoint with FastAPI, Pydantic schemas, ONNX support, health checks, and Dockerfile.',
-        tags: ['fastapi', 'serving', 'inference', 'docker', 'onnx'],
-        entryPoint: 'scripts/serve.py',
-    },
-    {
-        id: 'ml-data-pipeline',
-        name: 'Data Pipeline',
-        description: 'Scalable data processing pipeline using Polars and Pandas with DVC versioning, validation, and transformation stages.',
-        tags: ['pandas', 'polars', 'dvc', 'data-engineering'],
-        entryPoint: 'scripts/pipeline.py',
-    },
-    {
-        id: 'ml-rl-environment',
-        name: 'RL Environment',
-        description: 'Gymnasium-compatible reinforcement learning environment with Stable-Baselines3 training, TensorBoard logging, and evaluation.',
-        tags: ['gymnasium', 'rl', 'stable-baselines3', 'reinforcement-learning'],
-        entryPoint: 'scripts/train_rl.py',
-    },
-    {
-        id: 'ml-fine-tuning',
-        name: 'HuggingFace Fine-Tuning',
-        description: 'Parameter-efficient fine-tuning script using HuggingFace PEFT/LoRA, with W&B tracking and model card generation.',
-        tags: ['huggingface', 'peft', 'lora', 'fine-tuning', 'transformers'],
-        entryPoint: 'scripts/finetune.py',
-    },
-] as const;
-
-export type MLTemplateId = typeof ML_TEMPLATE_REGISTRY[number]['id'];
+export { ML_TEMPLATE_REGISTRY, type MLTemplateId } from '../services/ml/templates';

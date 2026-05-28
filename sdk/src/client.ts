@@ -6,8 +6,16 @@ import type {
 	AppWithFavoriteStatus,
 	BuildOptions,
 	BuildStartEvent,
+	CreateMLDatasetInput,
+	CreateMLExperimentInput,
+	CreateMLRunInput,
 	Credentials,
 	DeleteResult,
+	MLDataset,
+	MLExperiment,
+	MLRun,
+	MLTemplateDescriptor,
+	MLWorkbenchCapabilities,
 	PublicAppsQuery,
 	ToggleResult,
 	VibeClientOptions,
@@ -208,6 +216,78 @@ export class VibeClient {
 				method: 'POST',
 				headers: await this.http.headers({ 'Content-Type': 'application/json' }),
 			});
+		},
+	};
+
+	ml = {
+		/** Get Mad-Lab ML workbench capabilities. */
+		getCapabilities: async () => {
+			return this.http.fetchJson<ApiResponse<MLWorkbenchCapabilities>>('/api/ml/capabilities', {
+				method: 'GET',
+				headers: await this.http.headers(),
+			});
+		},
+
+		/** List scaffoldable ML project templates. */
+		listTemplates: async () => {
+			return this.http.fetchJson<ApiResponse<{ templates: MLTemplateDescriptor[] }>>('/api/ml/templates', {
+				method: 'GET',
+				headers: await this.http.headers(),
+			});
+		},
+
+		datasets: {
+			list: async (query: { limit?: number } = {}) => {
+				const qs = toQueryString({ limit: query.limit });
+				return this.http.fetchJson<ApiResponse<{ datasets: MLDataset[] }>>(`/api/ml/datasets${qs}`, {
+					method: 'GET',
+					headers: await this.http.headers(),
+				});
+			},
+
+			create: async (input: CreateMLDatasetInput) => {
+				return this.http.fetchJson<ApiResponse<{ dataset: MLDataset }>>('/api/ml/datasets', {
+					method: 'POST',
+					headers: await this.http.headers({ 'Content-Type': 'application/json' }),
+					body: JSON.stringify(input),
+				});
+			},
+		},
+
+		experiments: {
+			list: async (query: { limit?: number } = {}) => {
+				const qs = toQueryString({ limit: query.limit });
+				return this.http.fetchJson<ApiResponse<{ experiments: MLExperiment[] }>>(`/api/ml/experiments${qs}`, {
+					method: 'GET',
+					headers: await this.http.headers(),
+				});
+			},
+
+			create: async (input: CreateMLExperimentInput) => {
+				return this.http.fetchJson<ApiResponse<{ experiment: MLExperiment }>>('/api/ml/experiments', {
+					method: 'POST',
+					headers: await this.http.headers({ 'Content-Type': 'application/json' }),
+					body: JSON.stringify(input),
+				});
+			},
+		},
+
+		runs: {
+			list: async (query: { experimentId?: string; limit?: number } = {}) => {
+				const qs = toQueryString({ experimentId: query.experimentId, limit: query.limit });
+				return this.http.fetchJson<ApiResponse<{ runs: MLRun[] }>>(`/api/ml/runs${qs}`, {
+					method: 'GET',
+					headers: await this.http.headers(),
+				});
+			},
+
+			create: async (input: CreateMLRunInput) => {
+				return this.http.fetchJson<ApiResponse<{ run: MLRun }>>('/api/ml/runs', {
+					method: 'POST',
+					headers: await this.http.headers({ 'Content-Type': 'application/json' }),
+					body: JSON.stringify(input),
+				});
+			},
 		},
 	};
 }

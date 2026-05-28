@@ -48,6 +48,19 @@ export interface FeatureCapabilities {
 
 	// Behavior - determines generation approach (phasic vs agentic)
 	behaviorType: BehaviorType;
+
+	// Mad-Lab ML workbench capabilities
+	mlWorkbench?: {
+		trainingJobs: boolean;
+		evaluationRuns: boolean;
+		datasetUploads: boolean;
+		modelArtifactStorage: boolean;
+		experimentDashboards: boolean;
+		inferenceEndpoints: boolean;
+		autoMLSearch: boolean;
+		agentAssistedDebugging: boolean;
+		cognitiveMemoryRecall: boolean;
+	};
 }
 
 /**
@@ -189,13 +202,40 @@ export const DEFAULT_FEATURE_DEFINITIONS: Record<ProjectType, Omit<FeatureDefini
 			hasLiveReload: true,
 			requiresSandbox: true,
 			requiresWebSocket: true,
-			supportedViews: ['editor', 'preview', 'docs', 'blueprint'],
+			supportedViews: [
+				'editor',
+				'preview',
+				'docs',
+				'blueprint',
+				'terminal',
+				'datasets',
+				'experiments',
+				'runs',
+				'metrics',
+				'models',
+				'evaluation',
+				'serving',
+				'agents',
+				'memory',
+				'autonomy',
+			],
 			defaultView: 'editor',
 			supportedExports: ['github'],
 			hasCustomHeaderActions: true,
-			hasCustomSidebar: false,
+			hasCustomSidebar: true,
 			hasCustomFileFilter: false,
 			behaviorType: 'phasic',
+			mlWorkbench: {
+				trainingJobs: true,
+				evaluationRuns: true,
+				datasetUploads: true,
+				modelArtifactStorage: true,
+				experimentDashboards: true,
+				inferenceEndpoints: true,
+				autoMLSearch: true,
+				agentAssistedDebugging: true,
+				cognitiveMemoryRecall: true,
+			},
 		},
 	},
 };

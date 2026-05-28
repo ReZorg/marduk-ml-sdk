@@ -13,3 +13,9 @@ export { UserService } from './services/UserService';
 export { AppService } from './services/AppService';
 export { ModelConfigService } from './services/ModelConfigService';
 export { ModelTestService } from './services/ModelTestService';
+export { MLWorkbenchService } from './services/MLWorkbenchService';
+export type {
+	CreateMlDatasetInput,
+	CreateMlExperimentInput,
+	CreateMlRunInput,
+} from './services/MLWorkbenchService';
