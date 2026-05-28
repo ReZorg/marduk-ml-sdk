@@ -25,4 +25,5 @@ export type {
 	CreateMlAutomlStudyInput,
 	CreateMlArchonAgentInput,
 	CreateMlCognitiveMemoryLinkInput,
+	CreateMlAutonomyReportInput,
 } from './services/MLWorkbenchService';

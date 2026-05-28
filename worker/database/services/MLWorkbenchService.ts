@@ -114,6 +114,15 @@ export type CreateMlCognitiveMemoryLinkInput = {
 	metadata?: unknown;
 };
 
+export type CreateMlAutonomyReportInput = {
+	appId?: string;
+	reportType: 'health' | 'optimization' | 'alert' | 'recommendation';
+	status: 'healthy' | 'degraded' | 'critical' | 'unknown';
+	summary?: string;
+	suggestions?: unknown;
+	metrics?: unknown;
+};
+
 export class MLWorkbenchService extends BaseService {
 	// Dataset operations
 	async listDatasets(userId: string, limit = 50): Promise<schema.MlDataset[]> {
@@ -318,6 +327,14 @@ export class MLWorkbenchService extends BaseService {
 		updates?: { exitCode?: number; errorMessage?: string; runId?: string }
 	): Promise<schema.MlTrainingJob | undefined> {
 		const now = new Date();
+
+		// Fetch existing job to check if startedAt is already set (preserve on retries)
+		const existingJob = await this.getReadDb()
+			.select({ startedAt: schema.mlTrainingJobs.startedAt })
+			.from(schema.mlTrainingJobs)
+			.where(and(eq(schema.mlTrainingJobs.id, jobId), eq(schema.mlTrainingJobs.userId, userId)))
+			.get();
+
 		const [job] = await this.database
 			.update(schema.mlTrainingJobs)
 			.set({
@@ -325,7 +342,8 @@ export class MLWorkbenchService extends BaseService {
 				exitCode: updates?.exitCode,
 				errorMessage: updates?.errorMessage,
 				runId: updates?.runId,
-				startedAt: status === 'running' ? now : undefined,
+				// Only set startedAt on first transition to 'running', not on retries
+				startedAt: status === 'running' && !existingJob?.startedAt ? now : undefined,
 				completedAt: ['succeeded', 'failed', 'cancelled'].includes(status) ? now : undefined,
 				updatedAt: now,
 			})

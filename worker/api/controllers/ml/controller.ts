@@ -10,6 +10,7 @@ type CreateMlServingDeploymentInput,
 type CreateMlAutomlStudyInput,
 type CreateMlArchonAgentInput,
 type CreateMlCognitiveMemoryLinkInput,
+type CreateMlAutonomyReportInput,
 } from '../../../database';
 import { BaseController } from '../baseController';
 import type { ApiResponse, ControllerResponse } from '../types';
@@ -537,27 +538,21 @@ _ctx: ExecutionContext,
 context: RouteContext,
 ): Promise<ControllerResponse<ApiResponse<MlAutonomyReportData>>> {
 try {
-const body = await request.json() as {
-appId?: string;
-reportType: 'health' | 'optimization' | 'alert' | 'recommendation';
-status: 'healthy' | 'degraded' | 'critical' | 'unknown';
-summary?: string;
-suggestions?: unknown;
-metrics?: unknown;
-};
-if (!body.reportType || !body.status) {
+const parsed = await MLController.parseJsonBody<CreateMlAutonomyReportInput>(request);
+if (!parsed.success) return parsed.response as ControllerResponse<ApiResponse<MlAutonomyReportData>>;
+if (!isObject(parsed.data) || typeof parsed.data.reportType !== 'string' || typeof parsed.data.status !== 'string') {
 return MLController.createErrorResponse<MlAutonomyReportData>('Report type and status are required', 400);
 }
 
 const service = new MLWorkbenchService(env);
 const report = await service.createAutonomyReport(
 context.user!.id,
-body.appId ?? null,
-body.reportType,
-body.status,
-body.summary,
-body.suggestions,
-body.metrics
+parsed.data.appId ?? null,
+parsed.data.reportType,
+parsed.data.status,
+parsed.data.summary,
+parsed.data.suggestions,
+parsed.data.metrics
 );
 return MLController.createSuccessResponse({ report });
 } catch (error) {
