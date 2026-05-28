@@ -10,7 +10,15 @@ name: string;
 description: string;
 tags: string[];
 entryPoint: string;
-family: 'training' | 'serving' | 'data' | 'rl' | 'fine-tuning' | 'rag' | 'automl' | 'evaluation';
+family:
+	| 'training'
+	| 'serving'
+	| 'data'
+	| 'reinforcement-learning'
+	| 'fine-tuning'
+	| 'rag'
+	| 'automl'
+	| 'evaluation';
 files: Record<string, string>;
 dependencies: string[];
 commands: Record<string, string>;
@@ -103,7 +111,7 @@ name: 'RL Environment',
 description: 'Gymnasium-compatible reinforcement-learning environment with training and rollout evaluation.',
 tags: ['gymnasium', 'rl', 'stable-baselines3', 'reinforcement-learning'],
 entryPoint: 'scripts/train_rl.py',
-family: 'rl',
+family: 'reinforcement-learning',
 files: {
 'README.md': 'Environment API, reward function, training, and evaluation workflow.',
 'requirements.txt': 'gymnasium\nstable-baselines3\nnumpy\n',
