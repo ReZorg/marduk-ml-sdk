@@ -335,18 +335,29 @@ export class MLWorkbenchService extends BaseService {
 			.where(and(eq(schema.mlTrainingJobs.id, jobId), eq(schema.mlTrainingJobs.userId, userId)))
 			.get();
 
+		// Build update object conditionally to avoid setting undefined values
+		const updateData: Record<string, unknown> = {
+			status,
+			updatedAt: now,
+		};
+
+		if (updates?.exitCode !== undefined) updateData.exitCode = updates.exitCode;
+		if (updates?.errorMessage !== undefined) updateData.errorMessage = updates.errorMessage;
+		if (updates?.runId !== undefined) updateData.runId = updates.runId;
+
+		// Only set startedAt on first transition to 'running', not on retries
+		if (status === 'running' && !existingJob?.startedAt) {
+			updateData.startedAt = now;
+		}
+
+		// Set completedAt for terminal states
+		if (['succeeded', 'failed', 'cancelled'].includes(status)) {
+			updateData.completedAt = now;
+		}
+
 		const [job] = await this.database
 			.update(schema.mlTrainingJobs)
-			.set({
-				status,
-				exitCode: updates?.exitCode,
-				errorMessage: updates?.errorMessage,
-				runId: updates?.runId,
-				// Only set startedAt on first transition to 'running', not on retries
-				startedAt: status === 'running' && !existingJob?.startedAt ? now : undefined,
-				completedAt: ['succeeded', 'failed', 'cancelled'].includes(status) ? now : undefined,
-				updatedAt: now,
-			})
+			.set(updateData)
 			.where(and(eq(schema.mlTrainingJobs.id, jobId), eq(schema.mlTrainingJobs.userId, userId)))
 			.returning();
 		return job;
@@ -509,26 +520,18 @@ export class MLWorkbenchService extends BaseService {
 			.limit(limit);
 	}
 
-	async createAutonomyReport(
-		userId: string | null,
-		appId: string | null,
-		reportType: 'health' | 'optimization' | 'alert' | 'recommendation',
-		status: 'healthy' | 'degraded' | 'critical' | 'unknown',
-		summary?: string,
-		suggestions?: unknown,
-		metrics?: unknown
-	): Promise<schema.MlAutonomyReport> {
+	async createAutonomyReport(userId: string | null, input: CreateMlAutonomyReportInput): Promise<schema.MlAutonomyReport> {
 		const [report] = await this.database
 			.insert(schema.mlAutonomyReports)
 			.values({
 				id: generateId(),
 				userId,
-				appId,
-				reportType,
-				status,
-				summary,
-				suggestions: suggestions ?? [],
-				metrics: metrics ?? {},
+				appId: input.appId,
+				reportType: input.reportType,
+				status: input.status,
+				summary: input.summary,
+				suggestions: input.suggestions ?? [],
+				metrics: input.metrics ?? {},
 			})
 			.returning();
 		return report;

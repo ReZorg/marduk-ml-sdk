@@ -545,15 +545,7 @@ return MLController.createErrorResponse<MlAutonomyReportData>('Report type and s
 }
 
 const service = new MLWorkbenchService(env);
-const report = await service.createAutonomyReport(
-context.user!.id,
-parsed.data.appId ?? null,
-parsed.data.reportType,
-parsed.data.status,
-parsed.data.summary,
-parsed.data.suggestions,
-parsed.data.metrics
-);
+const report = await service.createAutonomyReport(context.user!.id, parsed.data as CreateMlAutonomyReportInput);
 return MLController.createSuccessResponse({ report });
 } catch (error) {
 MLController.logger.error('Failed to create ML autonomy report', error);
