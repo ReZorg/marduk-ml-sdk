@@ -21,6 +21,14 @@ export type {
     AppView, NewAppView, OAuthState, NewOAuthState,
     SystemSetting, NewSystemSetting,
     UserModelConfig, NewUserModelConfig,
+    MlDataset, NewMlDataset,
+    MlDatasetVersion, NewMlDatasetVersion,
+    MlExperiment, NewMlExperiment,
+    MlRun, NewMlRun,
+    MlRunMetric, NewMlRunMetric,
+    MlArtifact, NewMlArtifact,
+    MlModel, NewMlModel,
+    MlModelVersion, NewMlModelVersion,
 } from './schema';
 
 

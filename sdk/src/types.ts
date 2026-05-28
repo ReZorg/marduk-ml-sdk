@@ -83,6 +83,142 @@ export type ApiResponse<T> = BaseApiResponse<T>;
 export type { PaginationInfo };
 
 // ============================================================================
+// Mad-Lab ML Workbench Types
+// ============================================================================
+
+export type MLWorkbenchCapabilities = {
+	product: string;
+	version: string;
+	capabilities: {
+		trainingJobs: boolean;
+		evaluationRuns: boolean;
+		datasetUploads: boolean;
+		modelArtifactStorage: boolean;
+		experimentDashboards: boolean;
+		inferenceEndpoints: boolean;
+		autoMLSearch: boolean;
+		agentAssistedDebugging: boolean;
+		cognitiveMemoryRecall: boolean;
+	};
+	persistence: {
+		metadata: string;
+		artifacts: string;
+		fastState: string;
+		semanticRetrieval: string;
+	};
+	routes: string[];
+	templates: MLTemplateSummary[];
+};
+
+export type MLTemplateSummary = {
+	id: string;
+	name: string;
+	family: string;
+	description: string;
+	tags: string[];
+	entryPoint: string;
+	commands: Record<string, string>;
+	preview: {
+		type: string;
+		entry: string;
+	};
+	exportTargets: string[];
+};
+
+export type MLTemplateDescriptor = MLTemplateSummary & {
+	files: Record<string, string>;
+	dependencies: string[];
+	lifecycle: Record<string, string[] | undefined>;
+};
+
+export type MLDataset = {
+	id: string;
+	userId: string;
+	appId?: string | null;
+	name: string;
+	description?: string | null;
+	sourceType: 'upload' | 'import' | 'generated' | 'external';
+	format?: string | null;
+	status: 'registered' | 'processing' | 'ready' | 'failed' | 'archived';
+	currentVersionId?: string | null;
+	storageKey?: string | null;
+	schemaJson?: unknown;
+	metadata?: unknown;
+	createdAt?: string | null;
+	updatedAt?: string | null;
+};
+
+export type CreateMLDatasetInput = {
+	appId?: string;
+	name: string;
+	description?: string;
+	sourceType?: MLDataset['sourceType'];
+	format?: string;
+	storageKey?: string;
+	schemaJson?: unknown;
+	metadata?: unknown;
+};
+
+export type MLExperiment = {
+	id: string;
+	userId: string;
+	appId?: string | null;
+	datasetId?: string | null;
+	datasetVersionId?: string | null;
+	name: string;
+	description?: string | null;
+	targetMetric?: string | null;
+	goal?: 'maximize' | 'minimize' | null;
+	status: 'draft' | 'running' | 'completed' | 'failed' | 'archived';
+	config?: unknown;
+	metadata?: unknown;
+	createdAt?: string | null;
+	updatedAt?: string | null;
+};
+
+export type CreateMLExperimentInput = {
+	appId?: string;
+	datasetId?: string;
+	datasetVersionId?: string;
+	name: string;
+	description?: string;
+	targetMetric?: string;
+	goal?: MLExperiment['goal'];
+	config?: unknown;
+	metadata?: unknown;
+};
+
+export type MLRun = {
+	id: string;
+	experimentId: string;
+	userId: string;
+	appId?: string | null;
+	name?: string | null;
+	status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+	runType: 'training' | 'evaluation' | 'automl' | 'inference';
+	parameters?: unknown;
+	metrics?: unknown;
+	artifactRootKey?: string | null;
+	logKey?: string | null;
+	startedAt?: string | null;
+	completedAt?: string | null;
+	createdAt?: string | null;
+	updatedAt?: string | null;
+};
+
+export type CreateMLRunInput = {
+	appId?: string;
+	experimentId: string;
+	name?: string;
+	status?: MLRun['status'];
+	runType?: MLRun['runType'];
+	parameters?: unknown;
+	metrics?: unknown;
+	artifactRootKey?: string;
+	logKey?: string;
+};
+
+// ============================================================================
 // App Types (serialized versions of platform types)
 // ============================================================================
 

@@ -15,6 +15,7 @@ import { setupTicketRoutes } from './ticketRoutes';
 import { Hono } from "hono";
 import { AppEnv } from "../../types/appenv";
 import { setupStatusRoutes } from './statusRoutes';
+import { setupMLRoutes } from './mlRoutes';
 
 export function setupRoutes(app: Hono<AppEnv>): void {
     // Health check route
@@ -30,6 +31,9 @@ export function setupRoutes(app: Hono<AppEnv>): void {
 
     // Platform capabilities routes (public)
     setupCapabilitiesRoutes(app);
+
+    // Mad-Lab ML workbench routes
+    setupMLRoutes(app);
 
     // Authentication and user management routes
     setupAuthRoutes(app);

@@ -222,6 +222,184 @@ export const stars = sqliteTable('stars', {
 }));
 
 // ========================================
+// MAD-LAB ML WORKBENCH
+// ========================================
+
+/**
+ * ML Datasets table - Dataset metadata for Mad-Lab projects.
+ * Dataset bytes and large manifests live in R2; D1 stores searchable metadata.
+ */
+export const mlDatasets = sqliteTable('ml_datasets', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    sourceType: text('source_type', { enum: ['upload', 'import', 'generated', 'external'] }).notNull().default('upload'),
+    format: text('format'),
+    status: text('status', { enum: ['registered', 'processing', 'ready', 'failed', 'archived'] }).notNull().default('registered'),
+    currentVersionId: text('current_version_id'),
+    storageKey: text('storage_key'),
+    schemaJson: text('schema_json', { mode: 'json' }),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_datasets_user_idx').on(table.userId),
+    appIdx: index('ml_datasets_app_idx').on(table.appId),
+    statusIdx: index('ml_datasets_status_idx').on(table.status),
+    userNameIdx: index('ml_datasets_user_name_idx').on(table.userId, table.name),
+}));
+
+/**
+ * ML Dataset Versions table - Immutable dataset snapshots.
+ */
+export const mlDatasetVersions = sqliteTable('ml_dataset_versions', {
+    id: text('id').primaryKey(),
+    datasetId: text('dataset_id').notNull().references(() => mlDatasets.id, { onDelete: 'cascade' }),
+    version: text('version').notNull(),
+    storageKey: text('storage_key'),
+    checksum: text('checksum'),
+    rowCount: integer('row_count'),
+    byteSize: integer('byte_size'),
+    schemaJson: text('schema_json', { mode: 'json' }),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    datasetIdx: index('ml_dataset_versions_dataset_idx').on(table.datasetId),
+    datasetVersionIdx: uniqueIndex('ml_dataset_versions_dataset_version_idx').on(table.datasetId, table.version),
+}));
+
+/**
+ * ML Experiments table - Experiment definitions and tracking metadata.
+ */
+export const mlExperiments = sqliteTable('ml_experiments', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    datasetId: text('dataset_id').references(() => mlDatasets.id, { onDelete: 'set null' }),
+    datasetVersionId: text('dataset_version_id').references(() => mlDatasetVersions.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    targetMetric: text('target_metric'),
+    goal: text('goal', { enum: ['maximize', 'minimize'] }).default('maximize'),
+    status: text('status', { enum: ['draft', 'running', 'completed', 'failed', 'archived'] }).notNull().default('draft'),
+    config: text('config', { mode: 'json' }).default('{}'),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_experiments_user_idx').on(table.userId),
+    appIdx: index('ml_experiments_app_idx').on(table.appId),
+    datasetIdx: index('ml_experiments_dataset_idx').on(table.datasetId),
+    statusIdx: index('ml_experiments_status_idx').on(table.status),
+}));
+
+/**
+ * ML Runs table - Individual training/evaluation executions.
+ */
+export const mlRuns = sqliteTable('ml_runs', {
+    id: text('id').primaryKey(),
+    experimentId: text('experiment_id').notNull().references(() => mlExperiments.id, { onDelete: 'cascade' }),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    name: text('name'),
+    status: text('status', { enum: ['queued', 'running', 'succeeded', 'failed', 'cancelled'] }).notNull().default('queued'),
+    runType: text('run_type', { enum: ['training', 'evaluation', 'automl', 'inference'] }).notNull().default('training'),
+    parameters: text('parameters', { mode: 'json' }).default('{}'),
+    metrics: text('metrics', { mode: 'json' }).default('{}'),
+    artifactRootKey: text('artifact_root_key'),
+    logKey: text('log_key'),
+    startedAt: integer('started_at', { mode: 'timestamp' }),
+    completedAt: integer('completed_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    experimentIdx: index('ml_runs_experiment_idx').on(table.experimentId),
+    userIdx: index('ml_runs_user_idx').on(table.userId),
+    appIdx: index('ml_runs_app_idx').on(table.appId),
+    statusIdx: index('ml_runs_status_idx').on(table.status),
+    createdAtIdx: index('ml_runs_created_at_idx').on(table.createdAt),
+}));
+
+/**
+ * ML Run Metrics table - Time-series metric observations.
+ */
+export const mlRunMetrics = sqliteTable('ml_run_metrics', {
+    id: text('id').primaryKey(),
+    runId: text('run_id').notNull().references(() => mlRuns.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    value: real('value').notNull(),
+    step: integer('step'),
+    epoch: integer('epoch'),
+    timestamp: integer('timestamp', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    runIdx: index('ml_run_metrics_run_idx').on(table.runId),
+    runNameIdx: index('ml_run_metrics_run_name_idx').on(table.runId, table.name),
+}));
+
+/**
+ * ML Artifacts table - R2-backed artifacts produced by templates, runs, and evaluations.
+ */
+export const mlArtifacts = sqliteTable('ml_artifacts', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    runId: text('run_id').references(() => mlRuns.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: ['dataset', 'checkpoint', 'model', 'report', 'log', 'template', 'other'] }).notNull().default('other'),
+    name: text('name').notNull(),
+    storageKey: text('storage_key').notNull(),
+    mimeType: text('mime_type'),
+    byteSize: integer('byte_size'),
+    checksum: text('checksum'),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_artifacts_user_idx').on(table.userId),
+    appIdx: index('ml_artifacts_app_idx').on(table.appId),
+    runIdx: index('ml_artifacts_run_idx').on(table.runId),
+    kindIdx: index('ml_artifacts_kind_idx').on(table.kind),
+}));
+
+/**
+ * ML Models table - Registered model families.
+ */
+export const mlModels = sqliteTable('ml_models', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    taskType: text('task_type'),
+    status: text('status', { enum: ['draft', 'training', 'ready', 'deployed', 'archived'] }).notNull().default('draft'),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_models_user_idx').on(table.userId),
+    appIdx: index('ml_models_app_idx').on(table.appId),
+    statusIdx: index('ml_models_status_idx').on(table.status),
+}));
+
+/**
+ * ML Model Versions table - Model artifacts promoted from runs.
+ */
+export const mlModelVersions = sqliteTable('ml_model_versions', {
+    id: text('id').primaryKey(),
+    modelId: text('model_id').notNull().references(() => mlModels.id, { onDelete: 'cascade' }),
+    runId: text('run_id').references(() => mlRuns.id, { onDelete: 'set null' }),
+    version: text('version').notNull(),
+    artifactId: text('artifact_id').references(() => mlArtifacts.id, { onDelete: 'set null' }),
+    metrics: text('metrics', { mode: 'json' }).default('{}'),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    modelIdx: index('ml_model_versions_model_idx').on(table.modelId),
+    modelVersionIdx: uniqueIndex('ml_model_versions_model_version_idx').on(table.modelId, table.version),
+    runIdx: index('ml_model_versions_run_idx').on(table.runId),
+}));
+
+// ========================================
 // COMMUNITY INTERACTIONS
 // ========================================
 
@@ -570,3 +748,20 @@ export type NewUserModelProvider = typeof userModelProviders.$inferInsert;
 
 export type Star = typeof stars.$inferSelect;
 export type NewStar = typeof stars.$inferInsert;
+
+export type MlDataset = typeof mlDatasets.$inferSelect;
+export type NewMlDataset = typeof mlDatasets.$inferInsert;
+export type MlDatasetVersion = typeof mlDatasetVersions.$inferSelect;
+export type NewMlDatasetVersion = typeof mlDatasetVersions.$inferInsert;
+export type MlExperiment = typeof mlExperiments.$inferSelect;
+export type NewMlExperiment = typeof mlExperiments.$inferInsert;
+export type MlRun = typeof mlRuns.$inferSelect;
+export type NewMlRun = typeof mlRuns.$inferInsert;
+export type MlRunMetric = typeof mlRunMetrics.$inferSelect;
+export type NewMlRunMetric = typeof mlRunMetrics.$inferInsert;
+export type MlArtifact = typeof mlArtifacts.$inferSelect;
+export type NewMlArtifact = typeof mlArtifacts.$inferInsert;
+export type MlModel = typeof mlModels.$inferSelect;
+export type NewMlModel = typeof mlModels.$inferInsert;
+export type MlModelVersion = typeof mlModelVersions.$inferSelect;
+export type NewMlModelVersion = typeof mlModelVersions.$inferInsert;

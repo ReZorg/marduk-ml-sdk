@@ -36,6 +36,66 @@ const COGNITIVE_VIEWS: ViewDefinition[] = [
 		iconName: 'Terminal',
 		tooltip: 'Training logs and command output',
 	},
+	{
+		id: 'datasets',
+		label: 'Datasets',
+		iconName: 'Database',
+		tooltip: 'Upload, version, and inspect datasets',
+	},
+	{
+		id: 'experiments',
+		label: 'Experiments',
+		iconName: 'FlaskConical',
+		tooltip: 'Track ML experiments and objectives',
+	},
+	{
+		id: 'runs',
+		label: 'Runs',
+		iconName: 'Activity',
+		tooltip: 'Monitor training and evaluation runs',
+	},
+	{
+		id: 'metrics',
+		label: 'Metrics',
+		iconName: 'LineChart',
+		tooltip: 'Compare metrics across runs',
+	},
+	{
+		id: 'models',
+		label: 'Models',
+		iconName: 'Brain',
+		tooltip: 'Browse model versions and artifacts',
+	},
+	{
+		id: 'evaluation',
+		label: 'Evaluation',
+		iconName: 'ClipboardCheck',
+		tooltip: 'Review evaluation reports and benchmarks',
+	},
+	{
+		id: 'serving',
+		label: 'Serving',
+		iconName: 'RadioTower',
+		tooltip: 'Test inference endpoints and serving previews',
+	},
+	{
+		id: 'agents',
+		label: 'Agents',
+		iconName: 'Bot',
+		tooltip: 'Build and reuse Archon specialist agents',
+	},
+	{
+		id: 'memory',
+		label: 'Memory',
+		iconName: 'Network',
+		tooltip: 'Explore Marduk cognitive memory links',
+	},
+	{
+		id: 'autonomy',
+		label: 'Autonomy',
+		iconName: 'Sparkles',
+		tooltip: 'Review heartbeat recommendations',
+	},
 ];
 
 const cognitiveFeatureModule: FeatureModule = {
