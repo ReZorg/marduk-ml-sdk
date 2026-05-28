@@ -18,4 +18,11 @@ export type {
 	CreateMlDatasetInput,
 	CreateMlExperimentInput,
 	CreateMlRunInput,
+	CreateMlModelInput,
+	CreateMlEvaluationInput,
+	CreateMlTrainingJobInput,
+	CreateMlServingDeploymentInput,
+	CreateMlAutomlStudyInput,
+	CreateMlArchonAgentInput,
+	CreateMlCognitiveMemoryLinkInput,
 } from './services/MLWorkbenchService';

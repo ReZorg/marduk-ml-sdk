@@ -1,4 +1,16 @@
-import { MLWorkbenchService, type CreateMlDatasetInput, type CreateMlExperimentInput, type CreateMlRunInput } from '../../../database';
+import {
+MLWorkbenchService,
+type CreateMlDatasetInput,
+type CreateMlExperimentInput,
+type CreateMlRunInput,
+type CreateMlModelInput,
+type CreateMlEvaluationInput,
+type CreateMlTrainingJobInput,
+type CreateMlServingDeploymentInput,
+type CreateMlAutomlStudyInput,
+type CreateMlArchonAgentInput,
+type CreateMlCognitiveMemoryLinkInput,
+} from '../../../database';
 import { BaseController } from '../baseController';
 import type { ApiResponse, ControllerResponse } from '../types';
 import type { RouteContext } from '../../types/route-context';
@@ -13,6 +25,22 @@ MlExperimentsData,
 MlRunData,
 MlRunsData,
 MlTemplatesData,
+MlModelsData,
+MlModelData,
+MlEvaluationsData,
+MlEvaluationData,
+MlTrainingJobsData,
+MlTrainingJobData,
+MlServingDeploymentsData,
+MlServingDeploymentData,
+MlAutomlStudiesData,
+MlAutomlStudyData,
+MlArchonAgentsData,
+MlArchonAgentData,
+MlCognitiveMemoryLinksData,
+MlCognitiveMemoryLinkData,
+MlAutonomyReportsData,
+MlAutonomyReportData,
 } from './types';
 
 function parseLimit(request: Request): number {
@@ -31,6 +59,7 @@ return isObject(value) && typeof value.name === 'string' && value.name.trim().le
 }
 
 export class MLController extends BaseController {
+// Capabilities and templates
 static async getCapabilities(
 _request: Request,
 _env: Env,
@@ -49,6 +78,7 @@ _context: RouteContext,
 return MLController.createSuccessResponse({ templates: ML_TEMPLATE_REGISTRY });
 }
 
+// Dataset operations
 static async listDatasets(
 request: Request,
 env: Env,
@@ -90,6 +120,7 @@ return MLController.createErrorResponse<MlDatasetData>('Failed to create dataset
 }
 }
 
+// Experiment operations
 static async listExperiments(
 request: Request,
 env: Env,
@@ -133,6 +164,7 @@ return MLController.createErrorResponse<MlExperimentData>(message, status);
 }
 }
 
+// Run operations
 static async listRuns(
 request: Request,
 env: Env,
@@ -174,6 +206,363 @@ const message = error instanceof Error && error.message === 'Experiment not foun
 const status = message === 'Experiment not found' ? 404 : 500;
 MLController.logger.error('Failed to create ML run', error);
 return MLController.createErrorResponse<MlRunData>(message, status);
+}
+}
+
+// Model operations
+static async listModels(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlModelsData>>> {
+try {
+const service = new MLWorkbenchService(env);
+const models = await service.listModels(context.user!.id, parseLimit(request));
+return MLController.createSuccessResponse({ models });
+} catch (error) {
+MLController.logger.error('Failed to list ML models', error);
+return MLController.createErrorResponse<MlModelsData>('Failed to list models', 500);
+}
+}
+
+static async createModel(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlModelData>>> {
+try {
+const parsed = await MLController.parseJsonBody<CreateMlModelInput>(request);
+if (!parsed.success) return parsed.response as ControllerResponse<ApiResponse<MlModelData>>;
+if (!hasName(parsed.data)) {
+return MLController.createErrorResponse<MlModelData>('Model name is required', 400);
+}
+
+const service = new MLWorkbenchService(env);
+const model = await service.createModel(context.user!.id, {
+...parsed.data,
+name: parsed.data.name.trim(),
+});
+return MLController.createSuccessResponse({ model });
+} catch (error) {
+MLController.logger.error('Failed to create ML model', error);
+return MLController.createErrorResponse<MlModelData>('Failed to create model', 500);
+}
+}
+
+// Evaluation operations
+static async listEvaluations(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlEvaluationsData>>> {
+try {
+const service = new MLWorkbenchService(env);
+const evaluations = await service.listEvaluations(context.user!.id, parseLimit(request));
+return MLController.createSuccessResponse({ evaluations });
+} catch (error) {
+MLController.logger.error('Failed to list ML evaluations', error);
+return MLController.createErrorResponse<MlEvaluationsData>('Failed to list evaluations', 500);
+}
+}
+
+static async createEvaluation(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlEvaluationData>>> {
+try {
+const parsed = await MLController.parseJsonBody<CreateMlEvaluationInput>(request);
+if (!parsed.success) return parsed.response as ControllerResponse<ApiResponse<MlEvaluationData>>;
+if (!hasName(parsed.data)) {
+return MLController.createErrorResponse<MlEvaluationData>('Evaluation name is required', 400);
+}
+
+const service = new MLWorkbenchService(env);
+const evaluation = await service.createEvaluation(context.user!.id, {
+...parsed.data,
+name: parsed.data.name.trim(),
+});
+return MLController.createSuccessResponse({ evaluation });
+} catch (error) {
+MLController.logger.error('Failed to create ML evaluation', error);
+return MLController.createErrorResponse<MlEvaluationData>('Failed to create evaluation', 500);
+}
+}
+
+// Training job operations
+static async listTrainingJobs(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlTrainingJobsData>>> {
+try {
+const service = new MLWorkbenchService(env);
+const jobs = await service.listTrainingJobs(context.user!.id, parseLimit(request));
+return MLController.createSuccessResponse({ jobs });
+} catch (error) {
+MLController.logger.error('Failed to list ML training jobs', error);
+return MLController.createErrorResponse<MlTrainingJobsData>('Failed to list training jobs', 500);
+}
+}
+
+static async createTrainingJob(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlTrainingJobData>>> {
+try {
+const parsed = await MLController.parseJsonBody<CreateMlTrainingJobInput>(request);
+if (!parsed.success) return parsed.response as ControllerResponse<ApiResponse<MlTrainingJobData>>;
+if (!hasName(parsed.data)) {
+return MLController.createErrorResponse<MlTrainingJobData>('Training job name is required', 400);
+}
+
+const service = new MLWorkbenchService(env);
+const job = await service.createTrainingJob(context.user!.id, {
+...parsed.data,
+name: parsed.data.name.trim(),
+});
+return MLController.createSuccessResponse({ job });
+} catch (error) {
+MLController.logger.error('Failed to create ML training job', error);
+return MLController.createErrorResponse<MlTrainingJobData>('Failed to create training job', 500);
+}
+}
+
+// Serving deployment operations
+static async listServingDeployments(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlServingDeploymentsData>>> {
+try {
+const service = new MLWorkbenchService(env);
+const deployments = await service.listServingDeployments(context.user!.id, parseLimit(request));
+return MLController.createSuccessResponse({ deployments });
+} catch (error) {
+MLController.logger.error('Failed to list ML serving deployments', error);
+return MLController.createErrorResponse<MlServingDeploymentsData>('Failed to list serving deployments', 500);
+}
+}
+
+static async createServingDeployment(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlServingDeploymentData>>> {
+try {
+const parsed = await MLController.parseJsonBody<CreateMlServingDeploymentInput>(request);
+if (!parsed.success) return parsed.response as ControllerResponse<ApiResponse<MlServingDeploymentData>>;
+if (!hasName(parsed.data)) {
+return MLController.createErrorResponse<MlServingDeploymentData>('Serving deployment name is required', 400);
+}
+
+const service = new MLWorkbenchService(env);
+const deployment = await service.createServingDeployment(context.user!.id, {
+...parsed.data,
+name: parsed.data.name.trim(),
+});
+return MLController.createSuccessResponse({ deployment });
+} catch (error) {
+MLController.logger.error('Failed to create ML serving deployment', error);
+return MLController.createErrorResponse<MlServingDeploymentData>('Failed to create serving deployment', 500);
+}
+}
+
+// AutoML study operations
+static async listAutomlStudies(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlAutomlStudiesData>>> {
+try {
+const service = new MLWorkbenchService(env);
+const studies = await service.listAutomlStudies(context.user!.id, parseLimit(request));
+return MLController.createSuccessResponse({ studies });
+} catch (error) {
+MLController.logger.error('Failed to list ML AutoML studies', error);
+return MLController.createErrorResponse<MlAutomlStudiesData>('Failed to list AutoML studies', 500);
+}
+}
+
+static async createAutomlStudy(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlAutomlStudyData>>> {
+try {
+const parsed = await MLController.parseJsonBody<CreateMlAutomlStudyInput>(request);
+if (!parsed.success) return parsed.response as ControllerResponse<ApiResponse<MlAutomlStudyData>>;
+if (!hasName(parsed.data)) {
+return MLController.createErrorResponse<MlAutomlStudyData>('AutoML study name is required', 400);
+}
+
+const service = new MLWorkbenchService(env);
+const study = await service.createAutomlStudy(context.user!.id, {
+...parsed.data,
+name: parsed.data.name.trim(),
+});
+return MLController.createSuccessResponse({ study });
+} catch (error) {
+MLController.logger.error('Failed to create ML AutoML study', error);
+return MLController.createErrorResponse<MlAutomlStudyData>('Failed to create AutoML study', 500);
+}
+}
+
+// Archon agent operations
+static async listArchonAgents(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlArchonAgentsData>>> {
+try {
+const service = new MLWorkbenchService(env);
+const agents = await service.listArchonAgents(context.user!.id, parseLimit(request));
+return MLController.createSuccessResponse({ agents });
+} catch (error) {
+MLController.logger.error('Failed to list ML Archon agents', error);
+return MLController.createErrorResponse<MlArchonAgentsData>('Failed to list Archon agents', 500);
+}
+}
+
+static async createArchonAgent(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlArchonAgentData>>> {
+try {
+const parsed = await MLController.parseJsonBody<CreateMlArchonAgentInput>(request);
+if (!parsed.success) return parsed.response as ControllerResponse<ApiResponse<MlArchonAgentData>>;
+if (!hasName(parsed.data)) {
+return MLController.createErrorResponse<MlArchonAgentData>('Archon agent name is required', 400);
+}
+if (!isObject(parsed.data) || typeof parsed.data.agentType !== 'string') {
+return MLController.createErrorResponse<MlArchonAgentData>('Agent type is required', 400);
+}
+
+const service = new MLWorkbenchService(env);
+const agent = await service.createArchonAgent(context.user!.id, {
+...parsed.data,
+name: parsed.data.name.trim(),
+agentType: parsed.data.agentType as CreateMlArchonAgentInput['agentType'],
+});
+return MLController.createSuccessResponse({ agent });
+} catch (error) {
+MLController.logger.error('Failed to create ML Archon agent', error);
+return MLController.createErrorResponse<MlArchonAgentData>('Failed to create Archon agent', 500);
+}
+}
+
+// Cognitive memory operations
+static async listCognitiveMemoryLinks(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlCognitiveMemoryLinksData>>> {
+try {
+const url = new URL(request.url);
+const service = new MLWorkbenchService(env);
+const links = await service.listCognitiveMemoryLinks(
+context.user!.id,
+url.searchParams.get('entityType') ?? undefined,
+url.searchParams.get('entityId') ?? undefined,
+parseLimit(request)
+);
+return MLController.createSuccessResponse({ links });
+} catch (error) {
+MLController.logger.error('Failed to list ML cognitive memory links', error);
+return MLController.createErrorResponse<MlCognitiveMemoryLinksData>('Failed to list cognitive memory links', 500);
+}
+}
+
+static async createCognitiveMemoryLink(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlCognitiveMemoryLinkData>>> {
+try {
+const parsed = await MLController.parseJsonBody<CreateMlCognitiveMemoryLinkInput>(request);
+if (!parsed.success) return parsed.response as ControllerResponse<ApiResponse<MlCognitiveMemoryLinkData>>;
+if (!isObject(parsed.data) || typeof parsed.data.entityType !== 'string' || typeof parsed.data.entityId !== 'string') {
+return MLController.createErrorResponse<MlCognitiveMemoryLinkData>('Entity type and ID are required', 400);
+}
+if (typeof parsed.data.memoryType !== 'string' || typeof parsed.data.memoryKey !== 'string') {
+return MLController.createErrorResponse<MlCognitiveMemoryLinkData>('Memory type and key are required', 400);
+}
+
+const service = new MLWorkbenchService(env);
+const link = await service.createCognitiveMemoryLink(context.user!.id, parsed.data as CreateMlCognitiveMemoryLinkInput);
+return MLController.createSuccessResponse({ link });
+} catch (error) {
+MLController.logger.error('Failed to create ML cognitive memory link', error);
+return MLController.createErrorResponse<MlCognitiveMemoryLinkData>('Failed to create cognitive memory link', 500);
+}
+}
+
+// Autonomy report operations
+static async listAutonomyReports(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlAutonomyReportsData>>> {
+try {
+const service = new MLWorkbenchService(env);
+const reports = await service.listAutonomyReports(context.user!.id, parseLimit(request));
+return MLController.createSuccessResponse({ reports });
+} catch (error) {
+MLController.logger.error('Failed to list ML autonomy reports', error);
+return MLController.createErrorResponse<MlAutonomyReportsData>('Failed to list autonomy reports', 500);
+}
+}
+
+static async createAutonomyReport(
+request: Request,
+env: Env,
+_ctx: ExecutionContext,
+context: RouteContext,
+): Promise<ControllerResponse<ApiResponse<MlAutonomyReportData>>> {
+try {
+const body = await request.json() as {
+appId?: string;
+reportType: 'health' | 'optimization' | 'alert' | 'recommendation';
+status: 'healthy' | 'degraded' | 'critical' | 'unknown';
+summary?: string;
+suggestions?: unknown;
+metrics?: unknown;
+};
+if (!body.reportType || !body.status) {
+return MLController.createErrorResponse<MlAutonomyReportData>('Report type and status are required', 400);
+}
+
+const service = new MLWorkbenchService(env);
+const report = await service.createAutonomyReport(
+context.user!.id,
+body.appId ?? null,
+body.reportType,
+body.status,
+body.summary,
+body.suggestions,
+body.metrics
+);
+return MLController.createSuccessResponse({ report });
+} catch (error) {
+MLController.logger.error('Failed to create ML autonomy report', error);
+return MLController.createErrorResponse<MlAutonomyReportData>('Failed to create autonomy report', 500);
 }
 }
 }
