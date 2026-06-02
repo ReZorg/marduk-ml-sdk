@@ -399,6 +399,220 @@ export const mlModelVersions = sqliteTable('ml_model_versions', {
     runIdx: index('ml_model_versions_run_idx').on(table.runId),
 }));
 
+/**
+ * ML Evaluations table - Evaluation reports and benchmarks.
+ */
+export const mlEvaluations = sqliteTable('ml_evaluations', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    modelId: text('model_id').references(() => mlModels.id, { onDelete: 'set null' }),
+    modelVersionId: text('model_version_id').references(() => mlModelVersions.id, { onDelete: 'set null' }),
+    runId: text('run_id').references(() => mlRuns.id, { onDelete: 'set null' }),
+    datasetId: text('dataset_id').references(() => mlDatasets.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    status: text('status', { enum: ['pending', 'running', 'completed', 'failed'] }).notNull().default('pending'),
+    metrics: text('metrics', { mode: 'json' }).default('{}'),
+    reportKey: text('report_key'),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    startedAt: integer('started_at', { mode: 'timestamp' }),
+    completedAt: integer('completed_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_evaluations_user_idx').on(table.userId),
+    appIdx: index('ml_evaluations_app_idx').on(table.appId),
+    modelIdx: index('ml_evaluations_model_idx').on(table.modelId),
+    statusIdx: index('ml_evaluations_status_idx').on(table.status),
+}));
+
+/**
+ * ML Training Jobs table - Training job orchestration and lifecycle.
+ */
+export const mlTrainingJobs = sqliteTable('ml_training_jobs', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    experimentId: text('experiment_id').references(() => mlExperiments.id, { onDelete: 'cascade' }),
+    runId: text('run_id').references(() => mlRuns.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    status: text('status', { enum: ['queued', 'provisioning', 'running', 'succeeded', 'failed', 'cancelled'] }).notNull().default('queued'),
+    config: text('config', { mode: 'json' }).default('{}'),
+    resourceLimits: text('resource_limits', { mode: 'json' }).default('{}'),
+    logKey: text('log_key'),
+    checkpointKey: text('checkpoint_key'),
+    exitCode: integer('exit_code'),
+    errorMessage: text('error_message'),
+    retryCount: integer('retry_count').default(0),
+    maxRetries: integer('max_retries').default(3),
+    queuedAt: integer('queued_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    startedAt: integer('started_at', { mode: 'timestamp' }),
+    completedAt: integer('completed_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_training_jobs_user_idx').on(table.userId),
+    appIdx: index('ml_training_jobs_app_idx').on(table.appId),
+    experimentIdx: index('ml_training_jobs_experiment_idx').on(table.experimentId),
+    statusIdx: index('ml_training_jobs_status_idx').on(table.status),
+}));
+
+/**
+ * ML Serving Deployments table - Model serving endpoint lifecycle.
+ */
+export const mlServingDeployments = sqliteTable('ml_serving_deployments', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    modelId: text('model_id').references(() => mlModels.id, { onDelete: 'set null' }),
+    modelVersionId: text('model_version_id').references(() => mlModelVersions.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    status: text('status', { enum: ['provisioning', 'running', 'stopped', 'failed', 'deleted'] }).notNull().default('provisioning'),
+    endpointUrl: text('endpoint_url'),
+    containerConfig: text('container_config', { mode: 'json' }).default('{}'),
+    resourceLimits: text('resource_limits', { mode: 'json' }).default('{}'),
+    replicas: integer('replicas').default(1),
+    requestCount: integer('request_count').default(0),
+    lastRequestAt: integer('last_request_at', { mode: 'timestamp' }),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_serving_deployments_user_idx').on(table.userId),
+    appIdx: index('ml_serving_deployments_app_idx').on(table.appId),
+    modelIdx: index('ml_serving_deployments_model_idx').on(table.modelId),
+    statusIdx: index('ml_serving_deployments_status_idx').on(table.status),
+}));
+
+/**
+ * ML AutoML Studies table - AutoML/MOSES search orchestration.
+ */
+export const mlAutomlStudies = sqliteTable('ml_automl_studies', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    experimentId: text('experiment_id').references(() => mlExperiments.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    status: text('status', { enum: ['draft', 'running', 'paused', 'completed', 'failed'] }).notNull().default('draft'),
+    searchSpace: text('search_space', { mode: 'json' }).default('{}'),
+    objectives: text('objectives', { mode: 'json' }).default('[]'),
+    algorithm: text('algorithm', { enum: ['moses', 'optuna', 'grid', 'random'] }).default('moses'),
+    maxTrials: integer('max_trials').default(100),
+    completedTrials: integer('completed_trials').default(0),
+    bestTrialId: text('best_trial_id'),
+    bestScore: real('best_score'),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    startedAt: integer('started_at', { mode: 'timestamp' }),
+    completedAt: integer('completed_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_automl_studies_user_idx').on(table.userId),
+    appIdx: index('ml_automl_studies_app_idx').on(table.appId),
+    experimentIdx: index('ml_automl_studies_experiment_idx').on(table.experimentId),
+    statusIdx: index('ml_automl_studies_status_idx').on(table.status),
+}));
+
+/**
+ * ML AutoML Trials table - Individual AutoML search trials.
+ */
+export const mlAutomlTrials = sqliteTable('ml_automl_trials', {
+    id: text('id').primaryKey(),
+    studyId: text('study_id').notNull().references(() => mlAutomlStudies.id, { onDelete: 'cascade' }),
+    runId: text('run_id').references(() => mlRuns.id, { onDelete: 'set null' }),
+    trialNumber: integer('trial_number').notNull(),
+    status: text('status', { enum: ['pending', 'running', 'completed', 'pruned', 'failed'] }).notNull().default('pending'),
+    parameters: text('parameters', { mode: 'json' }).default('{}'),
+    metrics: text('metrics', { mode: 'json' }).default('{}'),
+    score: real('score'),
+    isPruned: integer('is_pruned', { mode: 'boolean' }).default(false),
+    isPromoted: integer('is_promoted', { mode: 'boolean' }).default(false),
+    startedAt: integer('started_at', { mode: 'timestamp' }),
+    completedAt: integer('completed_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    studyIdx: index('ml_automl_trials_study_idx').on(table.studyId),
+    studyTrialIdx: uniqueIndex('ml_automl_trials_study_trial_idx').on(table.studyId, table.trialNumber),
+    statusIdx: index('ml_automl_trials_status_idx').on(table.status),
+}));
+
+/**
+ * ML Cognitive Memory Links table - Marduk memory associations for ML entities.
+ */
+export const mlCognitiveMemoryLinks = sqliteTable('ml_cognitive_memory_links', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    entityType: text('entity_type', { enum: ['dataset', 'experiment', 'run', 'model', 'evaluation', 'study'] }).notNull(),
+    entityId: text('entity_id').notNull(),
+    memoryType: text('memory_type', { enum: ['declarative', 'episodic', 'procedural', 'semantic'] }).notNull(),
+    memoryKey: text('memory_key').notNull(),
+    content: text('content'),
+    embedding: text('embedding'),
+    relevanceScore: real('relevance_score'),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_cognitive_memory_links_user_idx').on(table.userId),
+    appIdx: index('ml_cognitive_memory_links_app_idx').on(table.appId),
+    entityIdx: index('ml_cognitive_memory_links_entity_idx').on(table.entityType, table.entityId),
+    memoryTypeIdx: index('ml_cognitive_memory_links_memory_type_idx').on(table.memoryType),
+}));
+
+/**
+ * ML Archon Agents table - Registered Archon specialist agents for ML tasks.
+ */
+export const mlArchonAgents = sqliteTable('ml_archon_agents', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    agentType: text('agent_type', { enum: ['dataset_profiler', 'feature_engineer', 'trainer', 'evaluator', 'hyperopt', 'serving', 'debugger', 'mlops', 'research'] }).notNull(),
+    capabilities: text('capabilities', { mode: 'json' }).default('[]'),
+    tools: text('tools', { mode: 'json' }).default('[]'),
+    objectives: text('objectives', { mode: 'json' }).default('[]'),
+    memoryScope: text('memory_scope', { enum: ['user', 'project', 'session'] }).default('project'),
+    safetyLimits: text('safety_limits', { mode: 'json' }).default('{}'),
+    isActive: integer('is_active', { mode: 'boolean' }).default(true),
+    usageCount: integer('usage_count').default(0),
+    lastUsedAt: integer('last_used_at', { mode: 'timestamp' }),
+    metadata: text('metadata', { mode: 'json' }).default('{}'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_archon_agents_user_idx').on(table.userId),
+    appIdx: index('ml_archon_agents_app_idx').on(table.appId),
+    agentTypeIdx: index('ml_archon_agents_type_idx').on(table.agentType),
+    isActiveIdx: index('ml_archon_agents_is_active_idx').on(table.isActive),
+}));
+
+/**
+ * ML Autonomy Reports table - System health and optimization recommendations.
+ */
+export const mlAutonomyReports = sqliteTable('ml_autonomy_reports', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    appId: text('app_id').references(() => apps.id, { onDelete: 'cascade' }),
+    reportType: text('report_type', { enum: ['health', 'optimization', 'alert', 'recommendation'] }).notNull(),
+    status: text('status', { enum: ['healthy', 'degraded', 'critical', 'unknown'] }).notNull().default('unknown'),
+    summary: text('summary'),
+    suggestions: text('suggestions', { mode: 'json' }).default('[]'),
+    metrics: text('metrics', { mode: 'json' }).default('{}'),
+    acknowledgedAt: integer('acknowledged_at', { mode: 'timestamp' }),
+    acknowledgedBy: text('acknowledged_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+    userIdx: index('ml_autonomy_reports_user_idx').on(table.userId),
+    appIdx: index('ml_autonomy_reports_app_idx').on(table.appId),
+    reportTypeIdx: index('ml_autonomy_reports_type_idx').on(table.reportType),
+    statusIdx: index('ml_autonomy_reports_status_idx').on(table.status),
+    createdAtIdx: index('ml_autonomy_reports_created_at_idx').on(table.createdAt),
+}));
+
 // ========================================
 // COMMUNITY INTERACTIONS
 // ========================================
@@ -765,3 +979,19 @@ export type MlModel = typeof mlModels.$inferSelect;
 export type NewMlModel = typeof mlModels.$inferInsert;
 export type MlModelVersion = typeof mlModelVersions.$inferSelect;
 export type NewMlModelVersion = typeof mlModelVersions.$inferInsert;
+export type MlEvaluation = typeof mlEvaluations.$inferSelect;
+export type NewMlEvaluation = typeof mlEvaluations.$inferInsert;
+export type MlTrainingJob = typeof mlTrainingJobs.$inferSelect;
+export type NewMlTrainingJob = typeof mlTrainingJobs.$inferInsert;
+export type MlServingDeployment = typeof mlServingDeployments.$inferSelect;
+export type NewMlServingDeployment = typeof mlServingDeployments.$inferInsert;
+export type MlAutomlStudy = typeof mlAutomlStudies.$inferSelect;
+export type NewMlAutomlStudy = typeof mlAutomlStudies.$inferInsert;
+export type MlAutomlTrial = typeof mlAutomlTrials.$inferSelect;
+export type NewMlAutomlTrial = typeof mlAutomlTrials.$inferInsert;
+export type MlCognitiveMemoryLink = typeof mlCognitiveMemoryLinks.$inferSelect;
+export type NewMlCognitiveMemoryLink = typeof mlCognitiveMemoryLinks.$inferInsert;
+export type MlArchonAgent = typeof mlArchonAgents.$inferSelect;
+export type NewMlArchonAgent = typeof mlArchonAgents.$inferInsert;
+export type MlAutonomyReport = typeof mlAutonomyReports.$inferSelect;
+export type NewMlAutonomyReport = typeof mlAutonomyReports.$inferInsert;
