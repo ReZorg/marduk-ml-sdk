@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/ReZorg/marduk-ml-sdk/compare/vibesdk-v1.6.0...vibesdk-v1.7.0) (2026-07-19)
+
+
+### Features
+
+* add Mad-Lab ML workbench backend - Phase 1 & 4 ([e88c7ce](https://github.com/ReZorg/marduk-ml-sdk/commit/e88c7cee8ff34512c4bdcf351c903ade9aff36d9))
+* implement Mad-Lab ML workbench backend infrastructure ([3d91f8e](https://github.com/ReZorg/marduk-ml-sdk/commit/3d91f8e63705f0bafa83ca97d8a66669cdfff2ef))
+
+
+### Bug Fixes
+
+* address code review feedback for ML workbench ([19b28da](https://github.com/ReZorg/marduk-ml-sdk/commit/19b28da3ae30b892380ae74912ebaf32d5e0e9d0))
+
 ## [1.6.0](https://github.com/ReZorg/marduk-ml-sdk/compare/vibesdk-v1.5.0...vibesdk-v1.6.0) (2026-05-26)
 
 
